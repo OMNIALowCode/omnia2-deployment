@@ -2,25 +2,12 @@
   "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
   "contentVersion": "1.0.0.0",
   "parameters": {
-    //"certificate": {
-    //  "type": "string",
-    //  "defaultValue": ""
-    //},
-    //"certificateThumbprint": {
-    //  "type": "string",
-    //  "defaultValue": "E17940DAB14E322B0A5EC6EAEDF893A64CB9AFBE"
-    //},
     "lpContactEmail": {
       "type": "string"
     },
     "sqlServerAdminPassword": {
       "type": "securestring"
     },
-    //"sqldbmymisCollation": {
-    //  "type": "string",
-    //  "minLength": 1,
-    //  "defaultValue": "SQL_Latin1_General_CP1_CI_AS"
-    //},
     "sqlDbEdition": {
       "type": "string",
       "defaultValue": "Standard",
@@ -87,69 +74,7 @@
     },
     "masterEmail": {
       "type": "string"
-    },
-    //"branding": {
-    //  "type": "string"
-    //},
-    //"defaultOem": {
-    //  "type": "string"
-    //},
-    //"gAnalytics": {
-    //  "type": "string"
-    //},
-    //"oAuthId": {
-    //  "type": "string"
-    //},
-    //"oAuthSecret": {
-    //  "type": "string"
-    //},
-    //"ms_Id": {
-    //  "type": "string"
-    //},
-    //"ms_Secret": {
-    //  "type": "string"
-    //},
-    //"twitter_Key": {
-    //  "type": "string"
-    //},
-    //"twitter_Secret": {
-    //  "type": "string"
-    //},
-    //"fb_Id": {
-    //  "type": "string"
-    //},
-    //"fb_Secret": {
-    //  "type": "string"
-    //},
-    //"linkedin_Key": {
-    //  "type": "string"
-    //},
-    //"linkedin_Secret": {
-    //  "type": "string"
-    //},
-    //"SQL_Management_StartIP": {
-    //  "type": "string"
-    //},
-    //"SQL_Management_EndIP": {
-    //  "type": "string"
-    //},
-
-    //"SQL_Management_StartIP2": {
-    //  "type": "string"
-    //},
-    //"SQL_Management_EndIP2": {
-    //  "type": "string"
-    //},
-    //"administrationUsers": {
-    //  "type": "string"
-    //},
-    //"administrationUserPasswords": {
-    //  "type": "string"
-    //},
-    //"fileSize": {
-    //  "type": "string",
-    //  "defaultValue": "10"
-    //}
+    }
   },
   "variables": {
     "location": "[resourceGroup().location]",
@@ -190,32 +115,6 @@
             "endIpAddress": "0.0.0.0"
           }
         },
-        //{
-        //  "name": "AllowIP1",
-        //  "type": "firewallrules",
-        //  "location": "[resourceGroup().location]",
-        //  "apiVersion": "2014-04-01-preview",
-        //  "dependsOn": [
-        //    "[concat('Microsoft.Sql/servers/', variables('sqlsrvmymisName'))]"
-        //  ],
-        //  "properties": {
-        //    "startIpAddress": "[parameters('SQL_Management_StartIP')]",
-        //    "endIpAddress": "[parameters('SQL_Management_EndIP')]"
-        //  }
-        //},
-        //{
-        //  "name": "AllowIP2",
-        //  "type": "firewallrules",
-        //  "location": "[resourceGroup().location]",
-        //  "apiVersion": "2014-04-01-preview",
-        //  "dependsOn": [
-        //    "[concat('Microsoft.Sql/servers/', variables('sqlsrvmymisName'))]"
-        //  ],
-        //  "properties": {
-        //    "startIpAddress": "[parameters('SQL_Management_StartIP2')]",
-        //    "endIpAddress": "[parameters('SQL_Management_EndIP2')]"
-        //  }
-        //},
         {
           "name": "[variables('sqldbmymisName')]",
           "type": "databases",
@@ -301,14 +200,6 @@
     }
   ],
   "outputs": {
-    //"certificate": {
-    //  "type": "string",
-    //  "value": "[parameters('certificate')]"
-    //},
-    //"certificateThumbprint": {
-    //  "type": "string",
-    //  "value": "[parameters('certificateThumbprint')]"
-    //},
     "lpContactEmail": {
       "type": "string",
       "value": "[parameters('lpContactEmail')]"
@@ -373,10 +264,6 @@
       "type": "string",
       "value": "mymis"
     },
-    //"gAnalytics": {
-    //  "type": "string",
-    //  "value": "[parameters('gAnalytics')]"
-    //},
     "oAuthId": {
       "type": "string",
       "value": "7b6a25222e65234e2d3c32616e"
@@ -385,46 +272,6 @@
       "type": "string",
       "value": "593d29374f694d6424524d7e7e6e657327433e2b4b2b5a3b473c325434"
     },
-    //"ms_Id": {
-    //  "type": "string",
-    //  "value": "[parameters('ms_Id')]"
-    //},
-    //"ms_Secret": {
-    //  "type": "string",
-    //  "value": "[parameters('ms_Secret')]"
-    //},
-    //"twitter_Key": {
-    //  "type": "string",
-    //  "value": "[parameters('twitter_Key')]"
-    //},
-    //"twitter_Secret": {
-    //  "type": "string",
-    //  "value": "[parameters('twitter_Secret')]"
-    //},
-    //"fb_Id": {
-    //  "type": "string",
-    //  "value": "[parameters('fb_Id')]"
-    //},
-    //"fb_Secret": {
-    //  "type": "string",
-    //  "value": "[parameters('fb_Secret')]"
-    //},
-    //"linkedin_Key": {
-    //  "type": "string",
-    //  "value": "[parameters('linkedin_Key')]"
-    //},
-    //"linkedin_Secret": {
-    //  "type": "string",
-    //  "value": "[parameters('linkedin_Secret')]"
-    //},
-    //"administrationUsers": {
-    //  "type": "string",
-    //  "value": "[parameters('administrationUsers')]"
-    //},
-    //"administrationUserPasswords": {
-    //  "type": "string",
-    //  "value": "[parameters('administrationUserPasswords')]"
-    //},
     "fileSize": {
       "type": "string",
       "value": "10"
