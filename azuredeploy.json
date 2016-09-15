@@ -2,9 +2,6 @@
   "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
   "contentVersion": "1.0.0.0",
   "parameters": {
-    "lpContactEmail": {
-      "type": "string"
-    },
     "sqlServerAdminPassword": {
       "type": "securestring"
     },
@@ -33,7 +30,7 @@
         "description": "Describes the performance level for Edition"
       }
     },
-    "appServiceWorkerSize": {
+    "workerSize": {
       "type": "string",
       "allowedValues": [
         "0",
@@ -147,7 +144,7 @@
       "properties": {
         "name": "[variables('appsrvplanmymisName')]",
         "sku": "[parameters('sku')]",
-        "workerSize": "[parameters('appServiceWorkerSize')]",
+        "workerSize": "[parameters('workerSize')]",
         "numberOfWorkers": 1
       }
     },
@@ -200,10 +197,6 @@
     }
   ],
   "outputs": {
-    "lpContactEmail": {
-      "type": "string",
-      "value": "[parameters('lpContactEmail')]"
-    },
     "saConnectionString": {
       "type": "string",
       "value": "[concat('DefaultEndpointsProtocol=https;AccountName=', variables('samymisName'), ';AccountKey=', listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('samymisName')), '2015-05-01-preview').key1)]"
