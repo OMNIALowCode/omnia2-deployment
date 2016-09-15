@@ -81,7 +81,8 @@
     "wsmymisName": "[concat('wsmymis', tolower(resourceGroup().name))]",
     "wsmymisnodeName": "[concat('wsmymisnode', tolower(resourceGroup().name))]",
     "appsrvplanmymisName": "[concat('appsrvplanmymis', tolower(resourceGroup().name))]",
-    "samymisName": "[concat('samymis', tolower(resourceGroup().name))]"
+    "samymisName": "[concat('samymis', tolower(resourceGroup().name))]",
+    "sqldbcollation": "SQL_Latin1_General_Cp1_CI_AS"
   },
   "resources": [
     {
@@ -113,22 +114,22 @@
           }
         },
         {
-          "name": "[variables('sqldbmymisName')]",
-          "type": "databases",
-          "location": "[resourceGroup().location]",
           "apiVersion": "2014-04-01-preview",
           "dependsOn": [
             "[variables('sqlsrvmymisName')]"
           ],
-          "tags": {
-            "displayName": "sqldbmymis"
-          },
+          "location": "[resourceGroup().location]",
+          "name": "[variables('sqldbmymisName')]",
           "properties": {
-            "collation": "SQL_Latin1_General_Cp1_CI_AS_KI_WI",
+            "collation": "[variables('sqldbCollation')]",
             "edition": "[parameters('sqlDbEdition')]",
             "maxSizeBytes": "1073741824",
             "requestedServiceObjectiveName": "[parameters('sqlDbPerformance')]"
-          }
+          },
+          "tags": {
+            "displayName": "sqldbmymis"
+          },
+          "type": "databases"
         }
       ]
     },
