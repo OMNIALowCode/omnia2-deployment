@@ -2,25 +2,26 @@
   "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
   "contentVersion": "1.0.0.0",
   "parameters": {
-    "certificate": {
-      "type": "string",
-    },
-    "certificateThumbprint": {
-      "type": "string",
-      "defaultValue": "E17940DAB14E322B0A5EC6EAEDF893A64CB9AFBE"
-    },
+    //"certificate": {
+    //  "type": "string",
+    //  "defaultValue": ""
+    //},
+    //"certificateThumbprint": {
+    //  "type": "string",
+    //  "defaultValue": "E17940DAB14E322B0A5EC6EAEDF893A64CB9AFBE"
+    //},
     "lpContactEmail": {
       "type": "string"
     },
-    "sqlsrvmymisAdminLoginPassword": {
+    "sqlServerAdminPassword": {
       "type": "securestring"
     },
-    "sqldbmymisCollation": {
-      "type": "string",
-      "minLength": 1,
-      "defaultValue": "SQL_Latin1_General_CP1_CI_AS"
-    },
-    "sqldbmymisEdition": {
+    //"sqldbmymisCollation": {
+    //  "type": "string",
+    //  "minLength": 1,
+    //  "defaultValue": "SQL_Latin1_General_CP1_CI_AS"
+    //},
+    "sqlDbEdition": {
       "type": "string",
       "defaultValue": "Standard",
       "allowedValues": [
@@ -29,7 +30,7 @@
         "Premium"
       ]
     },
-    "sqldbmymisRequestedServiceObjectiveName": {
+    "sqlDbPerformance": {
       "type": "string",
       "defaultValue": "S0",
       "allowedValues": [
@@ -45,7 +46,7 @@
         "description": "Describes the performance level for Edition"
       }
     },
-    "appsrvplanmymisWorkerSize": {
+    "appServiceWorkerSize": {
       "type": "string",
       "allowedValues": [
         "0",
@@ -54,7 +55,7 @@
       ],
       "defaultValue": "0"
     },
-    "appsrvplanmymisSKU": {
+    "sku": {
       "type": "string",
       "allowedValues": [
         "Free",
@@ -75,80 +76,80 @@
         "Premium_LRS"
       ]
     },
-    "sendGridUrl": {
+    "sendgridEmail": {
       "type": "string"
     },
-    "sendGridUsername": {
+    "sendgridUsername": {
       "type": "string"
     },
-    "sendGridPassword": {
+    "sendgridPassword": {
       "type": "string"
     },
     "masterEmail": {
       "type": "string"
     },
-    "branding": {
-      "type": "string"
-    },
-    "defaultOem": {
-      "type": "string"
-    },
-    "gAnalytics": {
-      "type": "string"
-    },
-    "oAuthId": {
-      "type": "string"
-    },
-    "oAuthSecret": {
-      "type": "string"
-    },
-    "ms_Id": {
-      "type": "string"
-    },
-    "ms_Secret": {
-      "type": "string"
-    },
-    "twitter_Key": {
-      "type": "string"
-    },
-    "twitter_Secret": {
-      "type": "string"
-    },
-    "fb_Id": {
-      "type": "string"
-    },
-    "fb_Secret": {
-      "type": "string"
-    },
-    "linkedin_Key": {
-      "type": "string"
-    },
-    "linkedin_Secret": {
-      "type": "string"
-    },
-    "SQL_Management_StartIP": {
-      "type": "string"
-    },
-    "SQL_Management_EndIP": {
-      "type": "string"
-    },
+    //"branding": {
+    //  "type": "string"
+    //},
+    //"defaultOem": {
+    //  "type": "string"
+    //},
+    //"gAnalytics": {
+    //  "type": "string"
+    //},
+    //"oAuthId": {
+    //  "type": "string"
+    //},
+    //"oAuthSecret": {
+    //  "type": "string"
+    //},
+    //"ms_Id": {
+    //  "type": "string"
+    //},
+    //"ms_Secret": {
+    //  "type": "string"
+    //},
+    //"twitter_Key": {
+    //  "type": "string"
+    //},
+    //"twitter_Secret": {
+    //  "type": "string"
+    //},
+    //"fb_Id": {
+    //  "type": "string"
+    //},
+    //"fb_Secret": {
+    //  "type": "string"
+    //},
+    //"linkedin_Key": {
+    //  "type": "string"
+    //},
+    //"linkedin_Secret": {
+    //  "type": "string"
+    //},
+    //"SQL_Management_StartIP": {
+    //  "type": "string"
+    //},
+    //"SQL_Management_EndIP": {
+    //  "type": "string"
+    //},
 
-    "SQL_Management_StartIP2": {
-      "type": "string"
-    },
-    "SQL_Management_EndIP2": {
-      "type": "string"
-    },
-    "administrationUsers": {
-      "type": "string"
-    },
-    "administrationUserPasswords": {
-      "type": "string"
-    },
-    "fileSize": {
-      "type": "string",
-      "defaultValue": "10"
-    }
+    //"SQL_Management_StartIP2": {
+    //  "type": "string"
+    //},
+    //"SQL_Management_EndIP2": {
+    //  "type": "string"
+    //},
+    //"administrationUsers": {
+    //  "type": "string"
+    //},
+    //"administrationUserPasswords": {
+    //  "type": "string"
+    //},
+    //"fileSize": {
+    //  "type": "string",
+    //  "defaultValue": "10"
+    //}
   },
   "variables": {
     "location": "[resourceGroup().location]",
@@ -173,7 +174,7 @@
       "properties": {
         "version": "12.0",
         "administratorLogin": "[variables('sqlsrvmymisAdminLogin')]",
-        "administratorLoginPassword": "[parameters('sqlsrvmymisAdminLoginPassword')]"
+        "administratorLoginPassword": "[parameters('sqlServerAdminPassword')]"
       },
       "resources": [
         {
@@ -189,32 +190,32 @@
             "endIpAddress": "0.0.0.0"
           }
         },
-        {
-          "name": "AllowIP1",
-          "type": "firewallrules",
-          "location": "[resourceGroup().location]",
-          "apiVersion": "2014-04-01-preview",
-          "dependsOn": [
-            "[concat('Microsoft.Sql/servers/', variables('sqlsrvmymisName'))]"
-          ],
-          "properties": {
-            "startIpAddress": "[parameters('SQL_Management_StartIP')]",
-            "endIpAddress": "[parameters('SQL_Management_EndIP')]"
-          }
-        },
-        {
-          "name": "AllowIP2",
-          "type": "firewallrules",
-          "location": "[resourceGroup().location]",
-          "apiVersion": "2014-04-01-preview",
-          "dependsOn": [
-            "[concat('Microsoft.Sql/servers/', variables('sqlsrvmymisName'))]"
-          ],
-          "properties": {
-            "startIpAddress": "[parameters('SQL_Management_StartIP2')]",
-            "endIpAddress": "[parameters('SQL_Management_EndIP2')]"
-          }
-        },
+        //{
+        //  "name": "AllowIP1",
+        //  "type": "firewallrules",
+        //  "location": "[resourceGroup().location]",
+        //  "apiVersion": "2014-04-01-preview",
+        //  "dependsOn": [
+        //    "[concat('Microsoft.Sql/servers/', variables('sqlsrvmymisName'))]"
+        //  ],
+        //  "properties": {
+        //    "startIpAddress": "[parameters('SQL_Management_StartIP')]",
+        //    "endIpAddress": "[parameters('SQL_Management_EndIP')]"
+        //  }
+        //},
+        //{
+        //  "name": "AllowIP2",
+        //  "type": "firewallrules",
+        //  "location": "[resourceGroup().location]",
+        //  "apiVersion": "2014-04-01-preview",
+        //  "dependsOn": [
+        //    "[concat('Microsoft.Sql/servers/', variables('sqlsrvmymisName'))]"
+        //  ],
+        //  "properties": {
+        //    "startIpAddress": "[parameters('SQL_Management_StartIP2')]",
+        //    "endIpAddress": "[parameters('SQL_Management_EndIP2')]"
+        //  }
+        //},
         {
           "name": "[variables('sqldbmymisName')]",
           "type": "databases",
@@ -227,10 +228,10 @@
             "displayName": "sqldbmymis"
           },
           "properties": {
-            "collation": "[parameters('sqldbmymisCollation')]",
-            "edition": "[parameters('sqldbmymisEdition')]",
+            "collation": "SQL_Latin1_General_Cp1_CI_AS_KI_WI",
+            "edition": "[parameters('sqlDbEdition')]",
             "maxSizeBytes": "1073741824",
-            "requestedServiceObjectiveName": "[parameters('sqldbmymisRequestedServiceObjectiveName')]"
+            "requestedServiceObjectiveName": "[parameters('sqlDbPerformance')]"
           }
         }
       ]
@@ -246,8 +247,8 @@
       },
       "properties": {
         "name": "[variables('appsrvplanmymisName')]",
-        "sku": "[parameters('appsrvplanmymisSKU')]",
-        "workerSize": "[parameters('appsrvplanmymisWorkerSize')]",
+        "sku": "[parameters('sku')]",
+        "workerSize": "[parameters('appServiceWorkerSize')]",
         "numberOfWorkers": 1
       }
     },
@@ -300,14 +301,14 @@
     }
   ],
   "outputs": {
-    "certificate": {
-      "type": "string",
-      "value": "[parameters('certificate')]"
-    },
-    "certificateThumbprint": {
-      "type": "string",
-      "value": "[parameters('certificateThumbprint')]"
-    },
+    //"certificate": {
+    //  "type": "string",
+    //  "value": "[parameters('certificate')]"
+    //},
+    //"certificateThumbprint": {
+    //  "type": "string",
+    //  "value": "[parameters('certificateThumbprint')]"
+    //},
     "lpContactEmail": {
       "type": "string",
       "value": "[parameters('lpContactEmail')]"
@@ -338,7 +339,7 @@
     },
     "sqlAdminPassword": {
       "type": "string",
-      "value": "[parameters('sqlsrvmymisAdminLoginPassword')]"
+      "value": "[parameters('sqlServerAdminPassword')]"
     },
     "webAppUrl": {
       "type": "string",
@@ -348,17 +349,17 @@
       "type": "string",
       "value": "[concat(variables('wsmymisnodeName'), '.azurewebsites.net')]"
     },
-    "sendGridUrl": {
+    "sendgridEmail": {
       "type": "string",
-      "value": "[parameters('sendGridUrl')]"
+      "value": "[parameters('sendgridEmail')]"
     },
-    "sendGridUsername": {
+    "sendgridUsername": {
       "type": "string",
-      "value": "[parameters('sendGridUsername')]"
+      "value": "[parameters('sendgridUsername')]"
     },
-    "sendGridPassword": {
+    "sendgridPassword": {
       "type": "string",
-      "value": "[parameters('sendGridPassword')]"
+      "value": "[parameters('sendgridPassword')]"
     },
     "masterEmail": {
       "type": "string",
@@ -366,67 +367,67 @@
     },
     "branding": {
       "type": "string",
-      "value": "[parameters('branding')]"
+      "value": "myMIS"
     },
     "defaultOem": {
       "type": "string",
-      "value": "[parameters('defaultOem')]"
+      "value": "mymis"
     },
-    "gAnalytics": {
-      "type": "string",
-      "value": "[parameters('gAnalytics')]"
-    },
+    //"gAnalytics": {
+    //  "type": "string",
+    //  "value": "[parameters('gAnalytics')]"
+    //},
     "oAuthId": {
       "type": "string",
-      "value": "[parameters('oAuthId')]"
+      "value": "7b6a25222e65234e2d3c32616e"
     },
     "oAuthSecret": {
       "type": "string",
-      "value": "[parameters('oAuthSecret')]"
+      "value": "593d29374f694d6424524d7e7e6e657327433e2b4b2b5a3b473c325434"
     },
-    "ms_Id": {
-      "type": "string",
-      "value": "[parameters('ms_Id')]"
-    },
-    "ms_Secret": {
-      "type": "string",
-      "value": "[parameters('ms_Secret')]"
-    },
-    "twitter_Key": {
-      "type": "string",
-      "value": "[parameters('twitter_Key')]"
-    },
-    "twitter_Secret": {
-      "type": "string",
-      "value": "[parameters('twitter_Secret')]"
-    },
-    "fb_Id": {
-      "type": "string",
-      "value": "[parameters('fb_Id')]"
-    },
-    "fb_Secret": {
-      "type": "string",
-      "value": "[parameters('fb_Secret')]"
-    },
-    "linkedin_Key": {
-      "type": "string",
-      "value": "[parameters('linkedin_Key')]"
-    },
-    "linkedin_Secret": {
-      "type": "string",
-      "value": "[parameters('linkedin_Secret')]"
-    },
-    "administrationUsers": {
-      "type": "string",
-      "value": "[parameters('administrationUsers')]"
-    },
-    "administrationUserPasswords": {
-      "type": "string",
-      "value": "[parameters('administrationUserPasswords')]"
-    },
+    //"ms_Id": {
+    //  "type": "string",
+    //  "value": "[parameters('ms_Id')]"
+    //},
+    //"ms_Secret": {
+    //  "type": "string",
+    //  "value": "[parameters('ms_Secret')]"
+    //},
+    //"twitter_Key": {
+    //  "type": "string",
+    //  "value": "[parameters('twitter_Key')]"
+    //},
+    //"twitter_Secret": {
+    //  "type": "string",
+    //  "value": "[parameters('twitter_Secret')]"
+    //},
+    //"fb_Id": {
+    //  "type": "string",
+    //  "value": "[parameters('fb_Id')]"
+    //},
+    //"fb_Secret": {
+    //  "type": "string",
+    //  "value": "[parameters('fb_Secret')]"
+    //},
+    //"linkedin_Key": {
+    //  "type": "string",
+    //  "value": "[parameters('linkedin_Key')]"
+    //},
+    //"linkedin_Secret": {
+    //  "type": "string",
+    //  "value": "[parameters('linkedin_Secret')]"
+    //},
+    //"administrationUsers": {
+    //  "type": "string",
+    //  "value": "[parameters('administrationUsers')]"
+    //},
+    //"administrationUserPasswords": {
+    //  "type": "string",
+    //  "value": "[parameters('administrationUserPasswords')]"
+    //},
     "fileSize": {
       "type": "string",
-      "value": "[parameters('fileSize')]"
+      "value": "10"
     }
   }
 }
