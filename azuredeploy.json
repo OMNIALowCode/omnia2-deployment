@@ -3,85 +3,46 @@
   "contentVersion": "1.0.0.0",
   "parameters": {
     "sqlServerAdminPassword": {
-      "type": "securestring"
-    },
-    "sqlDbEdition": {
-      "type": "string",
-      "defaultValue": "Standard",
-      "allowedValues": [
-        "Basic",
-        "Standard",
-        "Premium"
-      ]
-    },
-    "sqlDbPerformance": {
-      "type": "string",
-      "defaultValue": "S0",
-      "allowedValues": [
-        "Basic",
-        "S0",
-        "S1",
-        "S2",
-        "P1",
-        "P2",
-        "P3"
-      ],
+      "type": "securestring",
       "metadata": {
-        "description": "Describes the performance level for Edition"
+        "description": "Password for the SQL Server - account is MyMisMaster or your azure account"
       }
     },
-    "workerSize": {
-      "type": "string",
-      "allowedValues": [
-        "0",
-        "1",
-        "2"
-      ],
-      "defaultValue": "0"
-    },
-    "sku": {
-      "type": "string",
-      "allowedValues": [
-        "Free",
-        "Shared",
-        "Basic",
-        "Standard"
-      ],
-      "defaultValue": "Basic"
-    },
-    "mymisStorageType": {
-      "type": "string",
-      "defaultValue": "Standard_LRS",
-      "allowedValues": [
-        "Standard_LRS",
-        "Standard_ZRS",
-        "Standard_GRS",
-        "Standard_RAGRS",
-        "Premium_LRS"
-      ]
-    },
     "sendgridEmail": {
-      "type": "string"
+      "type": "string",
+      "defaultValue": "Configure a SendGrid account",
+      "metadata": {
+        "description": "Email to be displayed on platform-sent emails"
+      }
     },
     "sendgridUsername": {
-      "type": "string"
+      "type": "string",
+      "metadata": {
+        "description": "SendGrid login"
+      }
     },
     "sendgridPassword": {
-      "type": "string"
+      "type": "string",
+      "metadata": {
+        "description": "SendGrid login password"
+      }
     },
     "masterEmail": {
-      "type": "string"
+      "type": "string",
+      "metadata": {
+        "description": "Platform master email"
+      }
     }
   },
   "variables": {
     "location": "[resourceGroup().location]",
-    "sqlsrvmymisName": "[concat('sqlsrvmymis', tolower(resourceGroup().name))]",
-    "sqlsrvmymisAdminLogin": "[concat('sqlsrvmymisAdminLogin', tolower(resourceGroup().name))]",
-    "sqldbmymisName": "[concat('sqldbmymis', tolower(resourceGroup().name))]",
-    "wsmymisName": "[concat('wsmymis', tolower(resourceGroup().name))]",
-    "wsmymisnodeName": "[concat('wsmymisnode', tolower(resourceGroup().name))]",
-    "appsrvplanmymisName": "[concat('appsrvplanmymis', tolower(resourceGroup().name))]",
-    "samymisName": "[concat('samymis', tolower(resourceGroup().name))]",
+    "sqlsrvmymisName": "[concat('sqlsrvmymis', uniqueString(resourceGroup().id))]",
+    "sqlsrvmymisAdminLogin": "[concat('sqlsrvmymisAdminLogin', uniqueString(resourceGroup().id))]",
+    "sqldbmymisName": "[concat('sqldbmymis', uniqueString(resourceGroup().id))]",
+    "wsmymisName": "[concat('wsmymis', uniqueString(resourceGroup().id))]",
+    "wsmymisnodeName": "[concat('wsmymisnode', uniqueString(resourceGroup().id))]",
+    "appsrvplanmymisName": "[concat('appsrvplanmymis', uniqueString(resourceGroup().id))]",
+    "samymisName": "[concat('samymis', uniqueString(resourceGroup().id))]",
     "sqldbcollation": "SQL_Latin1_General_Cp1_CI_AS"
   },
   "resources": [
@@ -122,9 +83,9 @@
           "name": "[variables('sqldbmymisName')]",
           "properties": {
             "collation": "[variables('sqldbCollation')]",
-            "edition": "[parameters('sqlDbEdition')]",
+            "edition": "Standard",
             "maxSizeBytes": "1073741824",
-            "requestedServiceObjectiveName": "[parameters('sqlDbPerformance')]"
+            "requestedServiceObjectiveName": "S0"
           },
           "tags": {
             "displayName": "sqldbmymis"
@@ -144,8 +105,8 @@
       },
       "properties": {
         "name": "[variables('appsrvplanmymisName')]",
-        "sku": "[parameters('sku')]",
-        "workerSize": "[parameters('workerSize')]",
+        "sku": "Basic",
+        "workerSize": 0,
         "numberOfWorkers": 1
       }
     },
@@ -176,7 +137,7 @@
         "displayName": "samymis"
       },
       "properties": {
-        "accountType": "[parameters('mymisStorageType')]"
+        "accountType": "Standard_LRS"
       }
     },
     {
