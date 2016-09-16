@@ -124,9 +124,23 @@
       },
       "properties": {
         "name": "[variables('wsmymisName')]",
-        "serverFarmId": "[resourceId('Microsoft.Web/serverfarms/', variables('appsrvplanmymisName'))]"
-      }
-    },
+        "serverFarmId": "[resourceId('Microsoft.Web/serverfarms/', variables('appsrvplanmymisName'))]",
+        "siteConfig": {
+          "webSocketsEnabled": true,
+          "alwaysOn": true,
+          "appSettings": [
+            {
+              "Name": "api_oauth_id",
+              "Value": "7b6a25222e65234e2d3c32616e"
+            },
+            {
+              "Name": "api_oauth_secret",
+              "Value": "593d29374f694d6424524d7e7e6e657327433e2b4b2b5a3b473c325434"
+            }
+          ]
+        }
+        }
+      },
     {
       "name": "[variables('samymisName')]",
       "type": "Microsoft.Storage/storageAccounts",
@@ -154,7 +168,63 @@
       },
       "properties": {
         "name": "[variables('wsmymisnodeName')]",
-        "serverFarmId": "[resourceId('Microsoft.Web/serverfarms/', variables('appsrvplanmymisName'))]"
+        "serverFarmId": "[resourceId('Microsoft.Web/serverfarms/', variables('appsrvplanmymisName'))]",
+        "siteConfig": {
+          "appSettings": [
+            {
+              "Name": "api_endpoint",
+              "Value": "concat([variables('wsmymisName'), '.azurewebsites.net')]"
+            },
+            {
+              "Name": "api_oauth_id",
+              "Value": "7b6a25222e65234e2d3c32616e"
+            },
+            {
+              "Name": "api_oauth_secret",
+              "Value": "593d29374f694d6424524d7e7e6e657327433e2b4b2b5a3b473c325434"
+            },
+            {
+              "Name": "logging_azure_development_storage",
+              "Value": false
+            },
+            {
+              "Name": "logging_azure_storage_account",
+              "value": "[variables('samymisName')]"
+            },
+            {
+              "Name": "logging_azure_storage_account_key",
+              "Value": "[listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('samymisName')), '2015-05-01-preview').key1]"
+            },
+            {
+              "Name": "scripts_azure_development_storage",
+              "Value": false
+            },
+            {
+              "Name": "scripts_azure_storage_account",
+              "value": "[variables('samymisName')]"
+            },
+            {
+              "Name": "scripts_azure_storage_account_key",
+              "Value": "[listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('samymisName')), '2015-05-01-preview').key1]"
+            },
+            {
+              "Name": "communication_server_endpoint",
+              "Value": "***REMOVED***"
+            },
+            {
+              "Name": "communication_server_version",
+              "Value": "1.0.0"
+            },
+            {
+              "Name": "communication_server_secret",
+              "Value": "***REMOVED***"
+            },
+            {
+              "Name": "logging_logging_level",
+              "Value": true
+            }
+          ]
+        }
       }
     }
   ],
