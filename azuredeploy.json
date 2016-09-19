@@ -27,7 +27,7 @@
         "description": "SendGrid login password"
       }
     },
-    "masterEmail": {
+    "administrationEmail": {
       "type": "string",
       "metadata": {
         "description": "Platform master email"
@@ -43,7 +43,8 @@
     "wsmymisnodeName": "[concat('wsmymisnode', uniqueString(resourceGroup().id))]",
     "appsrvplanmymisName": "[concat('appsrvplanmymis', uniqueString(resourceGroup().id))]",
     "samymisName": "[concat('samymis', uniqueString(resourceGroup().id))]",
-    "sqldbcollation": "SQL_Latin1_General_Cp1_CI_AS"
+    "sqldbcollation": "SQL_Latin1_General_Cp1_CI_AS",
+    "certificateName": "myMIS Encryption Certificate"
   },
   "resources": [
     {
@@ -116,7 +117,9 @@
       "location": "[resourceGroup().location]",
       "apiVersion": "2015-08-01",
       "dependsOn": [
-        "[concat('Microsoft.Web/serverfarms/', variables('appsrvplanmymisName'))]"
+        "[concat('Microsoft.Web/serverfarms/', variables('appsrvplanmymisName'))]",
+        "[concat('Microsoft.Web/certificates/', variables('certificateName'))]",
+        "[concat('Microsoft.Sql/servers/', variables('sqlsrvmymisName'))]"
       ],
       "tags": {
         "[concat('hidden-related:', resourceGroup().id, '/providers/Microsoft.Web/serverfarms/', variables('appsrvplanmymisName'))]": "Resource",
@@ -130,16 +133,236 @@
           "alwaysOn": true,
           "appSettings": [
             {
-              "Name": "api_oauth_id",
+              "Name": "AzureWebJobsDashboard",
+              "Value": "[concat('DefaultEndpointsProtocol=https;AccountName=', variables('samymisName'), ';AccountKey=', listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('samymisName')), '2015-05-01-preview').key1)]"
+            },
+            {
+              "Name": "AzureWebJobsStorage",
+              "Value": "[concat('DefaultEndpointsProtocol=https;AccountName=', variables('samymisName'), ';AccountKey=', listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('samymisName')), '2015-05-01-preview').key1)]"
+            },
+            {
+              "Name": "MyMis.Options.HideGenericExceptions",
+              "Value": true
+            },
+            {
+              "Name": "MyMis.Options.GoogleAnalytics",
+              "Value": ""
+            },
+            {
+              "Name": "MyMis.MasterAccount",
+              "Value": "[parameters('administrationEmail')]"
+            },
+            {
+              "Name": "MyMis.AdministrationAccounts.Users",
+              "Value": ""
+            },
+            {
+              "Name": "MyMis.AdministrationAccounts.Passwords",
+              "Value": ""
+            },
+            {
+              "Name": "MyMis.DefaultCompany",
+              "Value": "mymis"
+            },
+            {
+              "Name": "MyMis.Branding",
+              "Value": "myMIS"
+            },
+            {
+              "Name": "MyMis.MaxFileSizeInMB",
+              "Value": "10"
+            },
+            {
+              "Name": "MyMis.Storage.ConnectionString",
+              "Value": "[concat('DefaultEndpointsProtocol=https;AccountName=', variables('samymisName'), ';AccountKey=', listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('samymisName')), '2015-05-01-preview').key1)]"
+            },
+            {
+              "Name": "MyMis.ServiceBus.ConnectionString",
+              "Value": "Endpoint=sb://example.com/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=example="
+            },
+            {
+              "Name": "MyMis.SQL.Core.ConnectionString",
+              "Value": "[concat('Data Source=',variables('sqlsrvmymisName'),'.database.windows.net;Initial Catalog=',variables('sqldbmymisName'),';user id=MyMisMaster;password=',parameters('sqlServerAdminPassword'),';MultipleActiveResultSets=True;Connection Timeout=60;')]"
+            },
+            {
+              "Name": "MyMis.SQL.Tenant.ConnectionString",
+              "Value": "Data Source=[SERVER];Initial Catalog=[DATABASE];persist security info=True;user id=[USERID];password=[PASSWORD];MultipleActiveResultSets=True;Connection Timeout=60;"
+            },
+            {
+              "Name": "MyMis.SQL.Management.ConnectionString",
+              "Value": "[concat('Data Source=[SERVER];Initial Catalog=[DATABASE];persist security info=True;user id=MyMisMaster;password=',parameters('sqlServerAdminPassword'),';MultipleActiveResultSets=True;Connection Timeout=60;')]"
+            },
+            {
+              "Name": "MyMis.OAuth2.ClientID",
               "Value": "7b6a25222e65234e2d3c32616e"
             },
             {
-              "Name": "api_oauth_secret",
+              "Name": "MyMis.OAuth2.ClientSecret",
               "Value": "593d29374f694d6424524d7e7e6e657327433e2b4b2b5a3b473c325434"
+            },
+            {
+              "Name": "MyMis.OAuth2.AuthorizationEndpoint",
+              "Value": "[concat('https://',variables('wsmymisName'), '.azurewebsites.net', '/api/OAuth/Authorize')]"
+            },
+            {
+              "Name": "MyMis.OAuth2.TokenEndpoint",
+              "Value": "[concat('https://',variables('wsmymisName'), '.azurewebsites.net', '/api/OAuth/Token')]"
+            },
+            {
+              "Name": "MyMis.API.Services.Endpoint",
+              "Value": "[concat('https://',variables('wsmymisName'), '.azurewebsites.net', '/api/v1/')]"
+            },
+            {
+              "Name": "MyMis.API.Account.Endpoint",
+              "Value": "[concat('https://',variables('wsmymisName'), '.azurewebsites.net', '/api/')]"
+            },
+            {
+              "Name": "MyMis.Web.Endpoint",
+              "Value": "[concat('https://',variables('wsmymisName'), '.azurewebsites.net/')]"
+            },
+            {
+              "Name": "MyMis.ExtensibilityEngine.Endpoint",
+              "Value": "[concat('http://',variables('wsmymisnodeName'), '.azurewebsites.net', '/evaluate')]"
+            },
+            {
+              "Name": "MyMis.ConnectorHub.Client",
+              "Value": "***REMOVED***"
+            },
+            {
+              "Name": "MyMis.ConnectorHub.Secret",
+              "Value": "***REMOVED***"
+            },
+            {
+              "Name": "MyMis.ConnectorHub.Endpoint",
+              "Value": "[concat('https://',variables('wsmymisName'), '.azurewebsites.net', '/api/')]"
+            },
+            {
+              "Name": "MyMis.Keys.Encrypt.PrivateKey",
+              "Value": "&lt;RSAKeyValue&gt;&lt;Modulus&gt;rBJnzTuHfGosBDHFad1RYdUDEjGVcCZZdTkyFnh3E3ChgnN9V1Z0XrOzWxbZVnVaOnTUcMwfww68ddGiLnMA8rNaeA220ue+KspUHq9gFcGTHDmCyx79yrWlpQZtO453GL9X+NVuH+nvinxwnL4p8L8+tOYQXgfiX6B3yjkuF/U=&lt;/Modulus&gt;&lt;Exponent&gt;AQAB&lt;/Exponent&gt;&lt;P&gt;45QLEjklsVbyeDxMXBAs6cwNkEmHb+nTREPnnIvuNgtIX1XOsYQdkoIyLdEl+II4jKsA4nSx8FbGAMLgjIeC/Q==&lt;/P&gt;&lt;Q&gt;wY/BNafpde9AIUGp52rER+8sUGH9s20Ef+s6wtKPjIQXsJ2N6LOIr+UELJTvIV6rg0w9fRkgWILwS+SQtSAmWQ==&lt;/Q&gt;&lt;DP&gt;taMMLxBDgEZIIiTmQTh70GKXlMjK+0yh3UNhUXXxu1rH+adP4Cj1PWEC0cSzTKQKpGM7woKnHo7zW9ouRJtHtQ==&lt;/DP&gt;&lt;DQ&gt;RUbOQAX46NzYdw6pYMo1tglEMwDfbHh4Q9BNF62E8yXT1MKPJ9oZ8dplxA8KB0d622NOHpf/m65BkugbYrg/AQ==&lt;/DQ&gt;&lt;InverseQ&gt;FY+nwL95a6L9sPBicCn+z9IdLsEDYkw0FOBF5AEUl+GUfZnmVmHDF4CPbq+B4UVBOi0ZI1DPpWmkeYxGLK8DAQ==&lt;/InverseQ&gt;&lt;D&gt;DZ0TK1CXYod/3gEWDk8dPjE9IfZcTVgrYbPZu59iRF532LtMYlmLsWZkPUOshEOalN9jY10y8hq7XFLukuA0Zd3rA2IOjIMwuqkaeG443dCnktfWiEnlpnjmGGYhK3Dzb1ApFJc2sx9HEOj0jlC4GtHPRJhVwbqmc8cWx8MllqE=&lt;/D&gt;&lt;/RSAKeyValue&gt;"
+            },
+            {
+              "Name": "MyMis.Plugins.Directory",
+              "Value": "Plugins\\Release\\"
+            },
+            {
+              "Name": "Microsoft.WindowsAzure.Plugins.Diagnostics.ConnectionString",
+              "Value": "[concat('DefaultEndpointsProtocol=https;AccountName=', variables('samymisName'), ';AccountKey=', listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('samymisName')), '2015-05-01-preview').key1)]"
+            },
+            {
+              "Name": "Microsoft.WindowsAzure.Plugins.RemoteAccess.Enabled",
+              "Value": ""
+            },
+            {
+              "Name": "Microsoft.WindowsAzure.Plugins.RemoteAccess.AccountUsername",
+              "Value": ""
+            },
+            {
+              "Name": "Microsoft.WindowsAzure.Plugins.RemoteAccess.AccountEncryptedPassword",
+              "Value": ""
+            },
+            {
+              "Name": "Microsoft.WindowsAzure.Plugins.RemoteAccess.AccountExpiration",
+              "Value": ""
+            },
+            {
+              "Name": "MyMis.Certificate.Thumbprint",
+              "Value": "7B055233E36CAF1AFD251D9A76DCB2C169A8073B"
+            },
+            {
+              "Name": "WEBSITE_LOAD_CERTIFICATES",
+              "Value": "7B055233E36CAF1AFD251D9A76DCB2C169A8073B"
+            },
+            {
+              "Name": "MyMis.Notification.From",
+              "Value": "[parameters('sendgridEmail')]"
+            },
+            {
+              "Name": "MyMis.Notification.SendGrid.Credentials.Username",
+              "Value": "[parameters('sendgridUsername')]"
+            },
+            {
+              "Name": "MyMis.Notification.SendGrid.Credentials.Password",
+              "Value": "[parameters('sendgridPassword')]"
+            },
+            {
+              "Name": "MyMis.ExternalAuth.Microsoft.ID",
+              "Value": ""
+            },
+            {
+              "Name": "MyMis.ExternalAuth.Microsoft.Secret",
+              "Value": ""
+            },
+            {
+              "Name": "MyMis.ExternalAuth.Twitter.Key",
+              "Value": ""
+            },
+            {
+              "Name": "MyMis.ExternalAuth.Twitter.Secret",
+              "Value": ""
+            },
+            {
+              "Name": "MyMis.ExternalAuth.Facebook.ID",
+              "Value": ""
+            },
+            {
+              "Name": "MyMis.ExternalAuth.Facebook.Secret",
+              "Value": ""
+            },
+            {
+              "Name": "MyMis.ExternalAuth.LinkedIn.Key",
+              "Value": ""
+            },
+            {
+              "Name": "MyMis.ExternalAuth.LinkedIn.Secret",
+              "Value": ""
+            },
+            {
+              "Name": "MyMis.SQL.Tenant.DefaultServer",
+              "Value": "[concat(variables('sqlsrvmymisName'),'.database.windows.net')]"
+            },
+            {
+              "Name": "MyMis.SQL.Tenant.DefaultDatabase",
+              "Value": "[variables('sqldbmymisName')]"
+            },
+            {
+              "Name": "MyMis.DeploymentEnvironment",
+              "Value": "AppService"
+            }
+          ],
+          "virtualApplications": [
+            {
+              "virtualPath": "/",
+              "physicalPath": "site\\wwwroot"
+            },
+            {
+              "virtualPath": "/api",
+              "physicalPath": "site\\wwwroot\\api"
+            }
+          ],
+          "connectionStrings": [
+            {
+              "Type": "Custom",
+              "Name": "AzureWebJobsDashboard",
+              "ConnectionString": "[concat('DefaultEndpointsProtocol=https;AccountName=', variables('samymisName'), ';AccountKey=', listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('samymisName')), '2015-05-01-preview').key1)]"
+            },
+            {
+              "Type": "Custom",
+              "Name": "AzureWebJobsStorage",
+              "ConnectionString": "[concat('DefaultEndpointsProtocol=https;AccountName=', variables('samymisName'), ';AccountKey=', listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('samymisName')), '2015-05-01-preview').key1)]"
+            },
+            {
+              "Type": "Custom",
+              "Name": "MyMis.Storage.ConnectionString",
+              "ConnectionString": "[concat('DefaultEndpointsProtocol=https;AccountName=', variables('samymisName'), ';AccountKey=', listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('samymisName')), '2015-05-01-preview').key1)]"
+            },
+            {
+              "Type": "SQLAzure",
+              "Name": "MyMis.SQL.Core.ConnectionString",
+              "ConnectionString": "[concat('Data Source=',variables('sqlsrvmymisName'),'.database.windows.net;Initial Catalog=',variables('sqldbmymisName'),';user id=MyMisMaster;password=',parameters('sqlServerAdminPassword'),';MultipleActiveResultSets=True;Connection Timeout=60;')]"
             }
           ]
         }
-        }
+      }
       },
     {
       "name": "[variables('samymisName')]",
@@ -152,6 +375,16 @@
       },
       "properties": {
         "accountType": "Standard_LRS"
+      }
+    },
+    {
+      "name": "[variables('certificateName')]",
+      "apiVersion": "2015-08-01",
+      "type": "Microsoft.Web/certificates",
+      "location": "[resourceGroup().location]",
+      "properties": {
+        "pfxBlob": "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",
+        "password": "4Amm!QVAi9Mt5l1p4u$oi*7th"
       }
     },
     {
@@ -279,7 +512,7 @@
     },
     "masterEmail": {
       "type": "string",
-      "value": "[parameters('masterEmail')]"
+      "value": "[parameters('administrationEmail')]"
     },
     "branding": {
       "type": "string",
