@@ -5,7 +5,7 @@
     "sqlServerAdminPassword": {
       "type": "securestring",
       "metadata": {
-        "description": "Password for the SQL Server - account is MyMisMaster or your azure account"
+        "description": "Password for the SQL Server - account is MyMisMaster or the variable sqlsrvmymisAdminLogin"
       }
     },
     "sendgridEmail": {
@@ -44,7 +44,7 @@
     "appsrvplanmymisName": "[concat('appsrvplanmymis', uniqueString(resourceGroup().id))]",
     "samymisName": "[concat('samymis', uniqueString(resourceGroup().id))]",
     "sqldbcollation": "SQL_Latin1_General_Cp1_CI_AS",
-    "certificateName": "myMIS Encryption Certificate"
+    "certificateName": "[concat('myMISCertificate',uniqueString(resourceGroup().id))]"
   },
   "resources": [
     {
@@ -362,8 +362,28 @@
             }
           ]
         }
-      }
       },
+      "resources": [
+        {
+          "apiVersion": "2015-08-01",
+          "name": "MSDeploy",
+          "type": "extensions",
+          "location": "[resourceGroup().location]",
+          "dependsOn": [
+            "[concat('Microsoft.Web/serverfarms/', variables('appsrvplanmymisName'))]",
+            "[concat('Microsoft.Web/certificates/', variables('certificateName'))]",
+            "[concat('Microsoft.Sql/servers/', variables('sqlsrvmymisName'))]",
+            "[concat('Microsoft.Web/Sites/', variables('wsmymisName'))]"
+          ],
+          "properties": {
+            "packageUri": "https://mymiswebdeploy.blob.core.windows.net/artifacts/MyMis.UI.Web.zip",
+            "setParameters": {
+              "IIS Web Application Name": "[variables('wsmymisName')]"
+            }
+          }
+        }
+      ]
+    },
     {
       "name": "[variables('samymisName')]",
       "type": "Microsoft.Storage/storageAccounts",
@@ -381,6 +401,9 @@
       "name": "[variables('certificateName')]",
       "apiVersion": "2015-08-01",
       "type": "Microsoft.Web/certificates",
+      "dependsOn": [
+        "[concat('Microsoft.Web/serverfarms/', variables('appsrvplanmymisName'))]"
+      ],
       "location": "[resourceGroup().location]",
       "properties": {
         "pfxBlob": "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",
@@ -388,151 +411,41 @@
       }
     },
     {
-      "name": "[variables('wsmymisnodeName')]",
-      "type": "Microsoft.Web/sites",
-      "location": "[resourceGroup().location]",
-      "apiVersion": "2015-08-01",
+      "name": "nodeTemplate",
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2016-02-01",
       "dependsOn": [
-        "[concat('Microsoft.Web/serverfarms/', variables('appsrvplanmymisName'))]"
+        "[concat('Microsoft.Web/serverfarms/', variables('appsrvplanmymisName'))]",
+        "[concat('Microsoft.Web/Sites/', variables('wsmymisName'))]"
       ],
-      "tags": {
-        "[concat('hidden-related:', resourceGroup().id, '/providers/Microsoft.Web/serverfarms/', variables('appsrvplanmymisName'))]": "Resource",
-        "displayName": "wsmymisnode"
-      },
       "properties": {
-        "name": "[variables('wsmymisnodeName')]",
-        "serverFarmId": "[resourceId('Microsoft.Web/serverfarms/', variables('appsrvplanmymisName'))]",
-        "siteConfig": {
-          "appSettings": [
-            {
-              "Name": "api_endpoint",
-              "Value": "concat([variables('wsmymisName'), '.azurewebsites.net')]"
-            },
-            {
-              "Name": "api_oauth_id",
-              "Value": "7b6a25222e65234e2d3c32616e"
-            },
-            {
-              "Name": "api_oauth_secret",
-              "Value": "593d29374f694d6424524d7e7e6e657327433e2b4b2b5a3b473c325434"
-            },
-            {
-              "Name": "logging_azure_development_storage",
-              "Value": false
-            },
-            {
-              "Name": "logging_azure_storage_account",
-              "value": "[variables('samymisName')]"
-            },
-            {
-              "Name": "logging_azure_storage_account_key",
-              "Value": "[listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('samymisName')), '2015-05-01-preview').key1]"
-            },
-            {
-              "Name": "scripts_azure_development_storage",
-              "Value": false
-            },
-            {
-              "Name": "scripts_azure_storage_account",
-              "value": "[variables('samymisName')]"
-            },
-            {
-              "Name": "scripts_azure_storage_account_key",
-              "Value": "[listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('samymisName')), '2015-05-01-preview').key1]"
-            },
-            {
-              "Name": "communication_server_endpoint",
-              "Value": "***REMOVED***"
-            },
-            {
-              "Name": "communication_server_version",
-              "Value": "1.0.0"
-            },
-            {
-              "Name": "communication_server_secret",
-              "Value": "***REMOVED***"
-            },
-            {
-              "Name": "logging_logging_level",
-              "Value": true
-            }
-          ]
+        "mode": "Incremental",
+        "templateLink": {
+          "uri": "https://mymiswebdeploy.blob.core.windows.net/artifacts/node.json"
+        },
+        "parameters": {
+          "samymisname": {
+            "value": "[variables('samymisName')]"
+          },
+          "samymiskey": {
+            "value": "[listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('samymisName')), '2015-05-01-preview').key1]"
+          },
+          "location": {
+            "value": "[resourceGroup().location]"
+          },
+          "wsmymisnodeName": {
+            "value": "[concat('wsmymisnode', uniqueString(resourceGroup().id))]"
+          },
+          "wsmymisName": {
+            "value": "[variables('wsmymisname')]"
+          },
+          "appsrvplanmymisName": {
+            "value": "[variables('appsrvplanmymisName')]"
+          }
         }
       }
     }
   ],
   "outputs": {
-    "saConnectionString": {
-      "type": "string",
-      "value": "[concat('DefaultEndpointsProtocol=https;AccountName=', variables('samymisName'), ';AccountKey=', listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('samymisName')), '2015-05-01-preview').key1)]"
-    },
-    "saName": {
-      "type": "string",
-      "value": "[variables('samymisName')]"
-    },
-    "saKey": {
-      "type": "string",
-      "value": "[listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('samymisName')), '2015-05-01-preview').key1]"
-    },
-    "sqlServer": {
-      "type": "string",
-      "value": "[variables('sqlsrvmymisName')]"
-    },
-    "sqlDatabase": {
-      "type": "string",
-      "value": "[variables('sqldbmymisName')]"
-    },
-    "sqlAdmin": {
-      "type": "string",
-      "value": "[variables('sqlsrvmymisAdminLogin')]"
-    },
-    "sqlAdminPassword": {
-      "type": "string",
-      "value": "[parameters('sqlServerAdminPassword')]"
-    },
-    "webAppUrl": {
-      "type": "string",
-      "value": "[concat(variables('wsmymisName'), '.azurewebsites.net')]"
-    },
-    "webExtensibility": {
-      "type": "string",
-      "value": "[concat(variables('wsmymisnodeName'), '.azurewebsites.net')]"
-    },
-    "sendgridEmail": {
-      "type": "string",
-      "value": "[parameters('sendgridEmail')]"
-    },
-    "sendgridUsername": {
-      "type": "string",
-      "value": "[parameters('sendgridUsername')]"
-    },
-    "sendgridPassword": {
-      "type": "string",
-      "value": "[parameters('sendgridPassword')]"
-    },
-    "masterEmail": {
-      "type": "string",
-      "value": "[parameters('administrationEmail')]"
-    },
-    "branding": {
-      "type": "string",
-      "value": "myMIS"
-    },
-    "defaultOem": {
-      "type": "string",
-      "value": "mymis"
-    },
-    "oAuthId": {
-      "type": "string",
-      "value": "7b6a25222e65234e2d3c32616e"
-    },
-    "oAuthSecret": {
-      "type": "string",
-      "value": "593d29374f694d6424524d7e7e6e657327433e2b4b2b5a3b473c325434"
-    },
-    "fileSize": {
-      "type": "string",
-      "value": "10"
-    }
   }
 }

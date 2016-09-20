@@ -1,0 +1,117 @@
+﻿{
+  "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "samymisname": {
+      "type": "string"
+    },
+    "wsmymisnodeName": {
+      "type": "string"
+    },
+    "location": {
+      "type": "string"
+    },
+    "appsrvplanmymisName": {
+      "type": "string"
+    },
+    "wsmymisName": {
+      "type": "string"
+    },
+    "samymiskey": {
+      "type": "string"
+    }
+  },
+  "variables": {
+  },
+  "resources": [
+    {
+      "name": "[parameters('wsmymisnodeName')]",
+      "type": "Microsoft.Web/sites",
+      "location": "[parameters('location')]",
+      "apiVersion": "2015-08-01",
+      "tags": {
+        "[concat('hidden-related:', resourceGroup().id, '/providers/Microsoft.Web/serverfarms/', parameters('appsrvplanmymisName'))]": "Resource",
+        "displayName": "wsmymisnode"
+      },
+      "properties": {
+        "name": "[parameters('wsmymisnodeName')]",
+        "serverFarmId": "[resourceId('Microsoft.Web/serverfarms/', parameters('appsrvplanmymisName'))]",
+        "siteConfig": {
+          "appSettings": [
+            {
+              "Name": "api_endpoint",
+              "Value": "concat([parameters('wsmymisName'), '.azurewebsites.net')]"
+            },
+            {
+              "Name": "api_oauth_id",
+              "Value": "7b6a25222e65234e2d3c32616e"
+            },
+            {
+              "Name": "api_oauth_secret",
+              "Value": "593d29374f694d6424524d7e7e6e657327433e2b4b2b5a3b473c325434"
+            },
+            {
+              "Name": "logging_azure_development_storage",
+              "Value": false
+            },
+            {
+              "Name": "logging_azure_storage_account",
+              "value": "[parameters('samymisName')]"
+            },
+            {
+              "Name": "logging_azure_storage_account_key",
+              "Value": "[parameters('samymiskey')]"
+            },
+            {
+              "Name": "scripts_azure_development_storage",
+              "Value": false
+            },
+            {
+              "Name": "scripts_azure_storage_account",
+              "value": "[parameters('samymisName')]"
+            },
+            {
+              "Name": "scripts_azure_storage_account_key",
+              "Value": "[parameters('samymiskey')]"
+            },
+            {
+              "Name": "communication_server_endpoint",
+              "Value": "***REMOVED***"
+            },
+            {
+              "Name": "communication_server_version",
+              "Value": "1.0.0"
+            },
+            {
+              "Name": "communication_server_secret",
+              "Value": "***REMOVED***"
+            },
+            {
+              "Name": "logging_logging_level",
+              "Value": true
+            }
+          ]
+        }
+      },
+      "resources": [
+        {
+          "apiVersion": "2015-08-01",
+          "name": "MSDeploy",
+          "type": "extensions",
+          "location": "[resourceGroup().location]",
+          "dependsOn": [
+            "[concat('Microsoft.Web/Sites/', parameters('wsmymisnodeName'))]"
+          ],
+          "properties": {
+            "packageUri": "https://mymiswebdeploy.blob.core.windows.net/artifacts/MyMis.Extensibility.Engine.zip",
+            "setParameters": {
+              "IIS Web Application Name": "[parameters('wsmymisnodeName')]"
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "outputs": {
+  }
+}
