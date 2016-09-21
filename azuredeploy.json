@@ -91,7 +91,26 @@
           "tags": {
             "displayName": "sqldbmymis"
           },
-          "type": "databases"
+          "type": "databases",
+          "resources": [
+            {
+              "name": "Import",
+              "type": "extensions",
+              "apiVersion": "2014-04-01-preview",
+              "dependsOn": [
+                "[variables('sqlsrvmymisName')]",
+                "[variables('sqldbmymisName')]"
+              ],
+              "properties": {
+                "storageUri": "https://mymiswebdeploy.blob.core.windows.net/artifacts/mymisDefault.bacpac",
+                "administratorLogin": "[variables('sqlsrvmymisAdminLogin')]",
+                "administratorLoginPassword": "[parameters('sqlServerAdminPassword')]",
+                "operationMode": "Import",
+                "storageKeyType": "SharedAccessKey",
+                "storageKey": "?"
+              }
+            }
+          ]
         }
       ]
     },
