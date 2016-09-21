@@ -204,6 +204,10 @@
               "Value": "[concat('Data Source=',variables('sqlsrvmymisName'),'.database.windows.net;Initial Catalog=',variables('sqldbmymisName'),';user id=MyMisMaster;password=',parameters('sqlServerAdminPassword'),';MultipleActiveResultSets=True;Connection Timeout=60;')]"
             },
             {
+              "Name": "MyMis.SQL.Deployment.ConnectionString",
+              "Value": "[concat('Data Source=',variables('sqlsrvmymisName'),'.database.windows.net;Initial Catalog=',variables('sqldbmymisName'),';user id=', variables('sqlsrvmymisAdminLogin'), ';password=',parameters('sqlServerAdminPassword'),';MultipleActiveResultSets=True;Connection Timeout=60;')]"
+            },
+            {
               "Name": "MyMis.SQL.Tenant.ConnectionString",
               "Value": "Data Source=[SERVER];Initial Catalog=[DATABASE];persist security info=True;user id=[USERID];password=[PASSWORD];MultipleActiveResultSets=True;Connection Timeout=60;"
             },
@@ -395,7 +399,7 @@
             "[concat('Microsoft.Web/Sites/', variables('wsmymisName'))]"
           ],
           "properties": {
-            "packageUri": "https://mymiswebdeploy.blob.core.windows.net/artifacts/MyMis.UI.Web.zip",
+            "packageUri": "https://mymiswebdeploy.blob.core.windows.net/artifacts/MyMis.Package.zip",
             "setParameters": {
               "IIS Web Application Name": "[variables('wsmymisName')]"
             }
