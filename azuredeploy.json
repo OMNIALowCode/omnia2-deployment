@@ -196,10 +196,6 @@
               "Value": "[concat('DefaultEndpointsProtocol=https;AccountName=', variables('samymisName'), ';AccountKey=', listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('samymisName')), '2015-05-01-preview').key1)]"
             },
             {
-              "Name": "MyMis.ServiceBus.ConnectionString",
-              "Value": "Endpoint=sb://example.com/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=example="
-            },
-            {
               "Name": "MyMis.SQL.Core.ConnectionString",
               "Value": "[concat('Data Source=',variables('sqlsrvmymisName'),'.database.windows.net;Initial Catalog=',variables('sqldbmymisName'),';user id=MyMisMaster;password=',parameters('sqlServerAdminPassword'),';MultipleActiveResultSets=True;Connection Timeout=60;')]"
             },
