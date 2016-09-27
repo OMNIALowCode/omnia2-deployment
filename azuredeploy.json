@@ -257,7 +257,7 @@
             },
             {
               "Name": "MyMis.Keys.Encrypt.PrivateKey",
-              "Value": "&lt;RSAKeyValue&gt;&lt;Modulus&gt;rBJnzTuHfGosBDHFad1RYdUDEjGVcCZZdTkyFnh3E3ChgnN9V1Z0XrOzWxbZVnVaOnTUcMwfww68ddGiLnMA8rNaeA220ue+KspUHq9gFcGTHDmCyx79yrWlpQZtO453GL9X+NVuH+nvinxwnL4p8L8+tOYQXgfiX6B3yjkuF/U=&lt;/Modulus&gt;&lt;Exponent&gt;AQAB&lt;/Exponent&gt;&lt;P&gt;45QLEjklsVbyeDxMXBAs6cwNkEmHb+nTREPnnIvuNgtIX1XOsYQdkoIyLdEl+II4jKsA4nSx8FbGAMLgjIeC/Q==&lt;/P&gt;&lt;Q&gt;wY/BNafpde9AIUGp52rER+8sUGH9s20Ef+s6wtKPjIQXsJ2N6LOIr+UELJTvIV6rg0w9fRkgWILwS+SQtSAmWQ==&lt;/Q&gt;&lt;DP&gt;taMMLxBDgEZIIiTmQTh70GKXlMjK+0yh3UNhUXXxu1rH+adP4Cj1PWEC0cSzTKQKpGM7woKnHo7zW9ouRJtHtQ==&lt;/DP&gt;&lt;DQ&gt;RUbOQAX46NzYdw6pYMo1tglEMwDfbHh4Q9BNF62E8yXT1MKPJ9oZ8dplxA8KB0d622NOHpf/m65BkugbYrg/AQ==&lt;/DQ&gt;&lt;InverseQ&gt;FY+nwL95a6L9sPBicCn+z9IdLsEDYkw0FOBF5AEUl+GUfZnmVmHDF4CPbq+B4UVBOi0ZI1DPpWmkeYxGLK8DAQ==&lt;/InverseQ&gt;&lt;D&gt;DZ0TK1CXYod/3gEWDk8dPjE9IfZcTVgrYbPZu59iRF532LtMYlmLsWZkPUOshEOalN9jY10y8hq7XFLukuA0Zd3rA2IOjIMwuqkaeG443dCnktfWiEnlpnjmGGYhK3Dzb1ApFJc2sx9HEOj0jlC4GtHPRJhVwbqmc8cWx8MllqE=&lt;/D&gt;&lt;/RSAKeyValue&gt;"
+              "Value": ***REMOVED***
             },
             {
               "Name": "MyMis.Plugins.Directory",
