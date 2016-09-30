@@ -37,10 +37,11 @@
         "name": "[parameters('wsmymisnodeName')]",
         "serverFarmId": "[resourceId('Microsoft.Web/serverfarms/', parameters('appsrvplanmymisName'))]",
         "siteConfig": {
+          "webSocketsEnabled": true,
           "appSettings": [
             {
               "Name": "api_endpoint",
-              "Value": "[concat(parameters('wsmymisName'), '.azurewebsites.net')]"
+              "Value": "[parameters('wsmymisName')]"
             },
             {
               "Name": "api_oauth_id",

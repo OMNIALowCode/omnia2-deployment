@@ -456,7 +456,7 @@
             "value": "[concat('wsmymisnode', uniqueString(resourceGroup().id))]"
           },
           "wsmymisName": {
-            "value": "[variables('wsmymisname')]"
+            "value": "[concat(variables('wsmymisName'),'.azurewebsites.net')]"
           },
           "appsrvplanmymisName": {
             "value": "[variables('appsrvplanmymisName')]"
