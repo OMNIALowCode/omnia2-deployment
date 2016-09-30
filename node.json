@@ -35,68 +35,7 @@
       },
       "properties": {
         "name": "[parameters('wsmymisnodeName')]",
-        "serverFarmId": "[resourceId('Microsoft.Web/serverfarms/', parameters('appsrvplanmymisName'))]",
-        "siteConfig": {
-          "webSocketsEnabled": true,
-          "appSettings": [
-            {
-              "Name": "api_endpoint",
-              "Value": "[parameters('wsmymisName')]"
-            },
-            {
-              "Name": "api_oauth_id",
-              "Value": "7b6a25222e65234e2d3c32616e"
-            },
-            {
-              "Name": "api_oauth_secret",
-              "Value": "593d29374f694d6424524d7e7e6e657327433e2b4b2b5a3b473c325434"
-            },
-            {
-              "Name": "logging_azure_development_storage",
-              "Value": "0"
-            },
-            {
-              "Name": "logging_azure_storage_account",
-              "value": "[parameters('samymisName')]"
-            },
-            {
-              "Name": "logging_azure_storage_account_key",
-              "Value": "[parameters('samymiskey')]"
-            },
-            {
-              "Name": "scripts_azure_development_storage",
-              "Value": "0"
-            },
-            {
-              "Name": "scripts_azure_storage_account",
-              "value": "[parameters('samymisName')]"
-            },
-            {
-              "Name": "scripts_azure_storage_account_key",
-              "Value": "[parameters('samymiskey')]"
-            },
-            {
-              "Name": "communication_server_endpoint",
-              "Value": "***REMOVED***"
-            },
-            {
-              "Name": "communication_server_version",
-              "Value": "1.0.0"
-            },
-            {
-              "Name": "communication_server_secret",
-              "Value": "***REMOVED***"
-            },
-            {
-              "Name": "logging_logging_level",
-              "Value": "debug"
-            },
-            {
-              "Name": "WEBSITE_NODE_DEFAULT_VERSION",
-              "Value": "4.4.7"
-            }
-          ]
-        }
+        "serverFarmId": "[resourceId('Microsoft.Web/serverfarms/', parameters('appsrvplanmymisName'))]"
       },
       "resources": [
         {
@@ -112,6 +51,44 @@
             "setParameters": {
               "IIS Web Application Name": "[parameters('wsmymisnodeName')]"
             }
+          }
+        },
+        {
+          "name": "appsettings",
+          "apiVersion": "2015-08-01",
+          "type": "config",
+          "dependsOn": [
+            "[concat('Microsoft.Web/Sites/', parameters('wsmymisnodeName'))]",
+            "[concat('Microsoft.Web/Sites/', parameters('wsmymisnodeName'), '/extensions/MSDeploy')]"
+          ],
+          "properties": {
+            "api_endpoint": "[parameters('wsmymisName')]",
+            "api_oauth_id": "7b6a25222e65234e2d3c32616e",
+            "api_oauth_secret": "593d29374f694d6424524d7e7e6e657327433e2b4b2b5a3b473c325434",
+            "logging_azure_development_storage": "0",
+            "logging_azure_storage_account": "[parameters('samymisName')]",
+            "logging_azure_storage_account_key": "[parameters('samymiskey')]",
+            "scripts_azure_development_storage": "0",
+            "scripts_azure_storage_account": "[parameters('samymisName')]",
+            "scripts_azure_storage_account_key": "[parameters('samymiskey')]",
+            "communication_server_endpoint": "***REMOVED***",
+            "communication_server_version": "1.0.0",
+            "communication_server_secret": "***REMOVED***",
+            "logging_logging_level": "debug",
+            "WEBSITE_NODE_DEFAULT_VERSION": "4.4.7"
+          }
+        },
+        {
+          "name": "web",
+          "apiVersion": "2015-08-01",
+          "type": "config",
+          "dependsOn": [
+            "[concat('Microsoft.Web/Sites/', parameters('wsmymisnodeName'))]",
+            "[concat('Microsoft.Web/Sites/', parameters('wsmymisnodeName'), '/extensions/MSDeploy')]",
+            "[concat('Microsoft.Web/Sites/', parameters('wsmymisnodeName'), '/config/appsettings')]"
+          ],
+          "properties": {
+            "webSocketsEnabled": true
           }
         }
       ]
