@@ -1,0 +1,154 @@
+
+    {
+      "name": "[variables('wsmymisName')]",
+      "type": "Microsoft.Web/sites",
+      "location": "[resourceGroup().location]",
+      "apiVersion": "2015-08-01",
+      "dependsOn": [
+        "[concat('Microsoft.Web/serverfarms/', variables('appsrvplanmymisName'))]",
+        "[concat('Microsoft.Web/certificates/', variables('certificateName'))]",
+        "[concat('Microsoft.Sql/servers/', variables('sqlsrvmymisName'))]"
+      ],
+      "tags": {
+        "[concat('hidden-related:', resourceGroup().id, '/providers/Microsoft.Web/serverfarms/', variables('appsrvplanmymisName'))]": "Resource",
+        "displayName": "wsmymis"
+      },
+      "properties": {
+        "name": "[variables('wsmymisName')]",
+        "serverFarmId": "[resourceId('Microsoft.Web/serverfarms/', variables('appsrvplanmymisName'))]"
+      },
+      "resources": [
+        {
+          "apiVersion": "2015-08-01",
+          "name": "MSDeploy",
+          "type": "extensions",
+          "location": "[resourceGroup().location]",
+          "dependsOn": [
+            "[concat('Microsoft.Web/serverfarms/', variables('appsrvplanmymisName'))]",
+            "[concat('Microsoft.Web/certificates/', variables('certificateName'))]",
+            "[concat('Microsoft.Sql/servers/', variables('sqlsrvmymisName'))]",
+            "[concat('Microsoft.Web/Sites/', variables('wsmymisName'))]"
+          ],
+          "properties": {
+            "packageUri": "https://mymiswebdeploy.blob.core.windows.net/artifacts/MyMis.Package.zip",
+            "setParameters": {
+              "IIS Web Application Name": "[variables('wsmymisName')]"
+            }
+          }
+        },
+        {
+          "name": "appsettings",
+          "apiVersion": "2015-08-01",
+          "type": "config",
+          "dependsOn": [
+            "[concat('Microsoft.Web/Sites/', variables('wsmymisName'))]",
+            "[concat('Microsoft.Web/Sites/', variables('wsmymisName'), '/extensions/MSDeploy')]"
+          ],
+          "properties": {
+            "AzureWebJobsDashboard": "[concat('DefaultEndpointsProtocol=https;AccountName=', variables('samymisName'), ';AccountKey=', listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('samymisName')), '2015-05-01-preview').key1)]",
+            "AzureWebJobsStorage": "[concat('DefaultEndpointsProtocol=https;AccountName=', variables('samymisName'), ';AccountKey=', listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('samymisName')), '2015-05-01-preview').key1)]",
+            "MyMis.Options.HideGenericExceptions": true,
+            "MyMis.Options.GoogleAnalytics": "",
+            "MyMis.MasterAccount": "[parameters('administrationEmail')]",
+            "MyMis.AdministrationAccounts.Users": "",
+            "MyMis.AdministrationAccounts.Passwords": "",
+            "MyMis.DefaultCompany": "mymis",
+            "MyMis.Branding": "myMIS",
+            "MyMis.MaxFileSizeInMB": "10",
+            "MyMis.Storage.ConnectionString": "[concat('DefaultEndpointsProtocol=https;AccountName=', variables('samymisName'), ';AccountKey=', listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('samymisName')), '2015-05-01-preview').key1)]",
+            "MyMis.SQL.Core.ConnectionString": "[concat('Data Source=',variables('sqlsrvmymisName'),'.database.windows.net;Initial Catalog=',variables('sqldbmymisName'),';user id=MyMisMaster;password=',parameters('sqlServerAdminPassword'),';MultipleActiveResultSets=True;Connection Timeout=60;')]",
+            "MyMis.SQL.Deployment.ConnectionString": "[concat('Data Source=',variables('sqlsrvmymisName'),'.database.windows.net;Initial Catalog=',variables('sqldbmymisName'),';user id=', variables('sqlsrvmymisAdminLogin'), ';password=',parameters('sqlServerAdminPassword'),';MultipleActiveResultSets=True;Connection Timeout=60;')]",
+            "MyMis.SQL.Tenant.ConnectionString": "Data Source=[SERVER];Initial Catalog=[DATABASE];persist security info=True;user id=[USERID];password=[PASSWORD];MultipleActiveResultSets=True;Connection Timeout=60;",
+            "MyMis.SQL.Management.ConnectionString": "[concat('Data Source=[SERVER];Initial Catalog=[DATABASE];persist security info=True;user id=MyMisMaster;password=',parameters('sqlServerAdminPassword'),';MultipleActiveResultSets=True;Connection Timeout=60;')]",
+            "MyMis.OAuth2.ClientID": "7b6a25222e65234e2d3c32616e",
+            "MyMis.OAuth2.ClientSecret": "593d29374f694d6424524d7e7e6e657327433e2b4b2b5a3b473c325434",
+            "MyMis.OAuth2.AuthorizationEndpoint": "[concat('https://',variables('wsmymisName'), '.azurewebsites.net', '/api/OAuth/Authorize')]",
+            "MyMis.OAuth2.TokenEndpoint": "[concat('https://',variables('wsmymisName'), '.azurewebsites.net', '/api/OAuth/Token')]",
+            "MyMis.API.Services.Endpoint": "[concat('https://',variables('wsmymisName'), '.azurewebsites.net', '/api/v1/')]",
+            "MyMis.API.Account.Endpoint": "[concat('https://',variables('wsmymisName'), '.azurewebsites.net', '/api/')]",
+            "MyMis.Web.Endpoint": "[concat('https://',variables('wsmymisName'), '.azurewebsites.net/')]",
+            "MyMis.ExtensibilityEngine.Endpoint": "[concat('http://',variables('wsmymisnodeName'), '.azurewebsites.net', '/evaluate')]",
+            "MyMis.ConnectorHub.Client": "***REMOVED***",
+            "MyMis.ConnectorHub.Secret": "***REMOVED***",
+            "MyMis.ConnectorHub.Endpoint": "[concat('https://',variables('wsmymisName'), '.azurewebsites.net', '/api/')]",
+            "MyMis.Keys.Encrypt.PrivateKey": ***REMOVED***,
+            "MyMis.Plugins.Directory": "Plugins\\Release\\",
+            "Microsoft.WindowsAzure.Plugins.Diagnostics.ConnectionString": "[concat('DefaultEndpointsProtocol=https;AccountName=', variables('samymisName'), ';AccountKey=', listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('samymisName')), '2015-05-01-preview').key1)]",
+            "Microsoft.WindowsAzure.Plugins.RemoteAccess.Enabled": "",
+            "Microsoft.WindowsAzure.Plugins.RemoteAccess.AccountUsername": "",
+            "Microsoft.WindowsAzure.Plugins.RemoteAccess.AccountEncryptedPassword": "",
+            "Microsoft.WindowsAzure.Plugins.RemoteAccess.AccountExpiration": "",
+            "MyMis.Certificate.Thumbprint": "7B055233E36CAF1AFD251D9A76DCB2C169A8073B",
+            "WEBSITE_LOAD_CERTIFICATES": "7B055233E36CAF1AFD251D9A76DCB2C169A8073B",
+            "MyMis.Notification.From": "[parameters('sendgridEmail')]",
+            "MyMis.Notification.SendGrid.Credentials.Username": "[parameters('sendgridUsername')]",
+            "MyMis.Notification.SendGrid.Credentials.Password": "[parameters('sendgridPassword')]",
+            "MyMis.ExternalAuth.Microsoft.ID": "",
+            "MyMis.ExternalAuth.Microsoft.Secret": "",
+            "MyMis.ExternalAuth.Twitter.Key": "",
+            "MyMis.ExternalAuth.Twitter.Secret": "",
+            "MyMis.ExternalAuth.Facebook.ID": "",
+            "MyMis.ExternalAuth.Facebook.Secret": "",
+            "MyMis.ExternalAuth.LinkedIn.Key": "",
+            "MyMis.ExternalAuth.LinkedIn.Secret": "",
+            "MyMis.SQL.Tenant.DefaultServer": "[concat(variables('sqlsrvmymisName'),'.database.windows.net')]",
+            "MyMis.SQL.Tenant.DefaultDatabase": "[variables('sqldbmymisName')]",
+            "MyMis.DeploymentEnvironment": "AppService"
+
+          }
+        },
+        {
+          "name": "connectionstrings",
+          "apiVersion": "2015-08-01",
+          "type": "config",
+          "dependsOn": [
+            "[concat('Microsoft.Web/Sites/', variables('wsmymisName'))]",
+            "[concat('Microsoft.Web/Sites/', variables('wsmymisName'), '/extensions/MSDeploy')]",
+            "[concat('Microsoft.Web/Sites/', variables('wsmymisName'), '/appsettings/config')]"
+          ],
+          "properties": {
+            "AzureWebJobsDashboard": {
+              "type": "Custom",
+              "value": "[concat('DefaultEndpointsProtocol=https;AccountName=', variables('samymisName'), ';AccountKey=', listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('samymisName')), '2015-05-01-preview').key1)]"
+            },
+            "AzureWebJobsStorage": {
+              "type": "Custom",
+              "value": "[concat('DefaultEndpointsProtocol=https;AccountName=', variables('samymisName'), ';AccountKey=', listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('samymisName')), '2015-05-01-preview').key1)]"
+            },
+            "MyMis.Storage.ConnectionString": {
+              "type": "Custom",
+              "value": "[concat('DefaultEndpointsProtocol=https;AccountName=', variables('samymisName'), ';AccountKey=', listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('samymisName')), '2015-05-01-preview').key1)]"
+            },
+            "MyMis.SQL.Core.ConnectionString": {
+              "value": "[concat('Data Source=',variables('sqlsrvmymisName'),'.database.windows.net;Initial Catalog=',variables('sqldbmymisName'),';user id=MyMisMaster;password=',parameters('sqlServerAdminPassword'),';MultipleActiveResultSets=True;Connection Timeout=60;')]",
+              "type": "SQLAzure"
+            }
+          }
+        },
+        {
+          "name": "web",
+          "apiVersion": "2015-08-01",
+          "type": "config",
+          "dependsOn": [
+            "[concat('Microsoft.Web/Sites/', variables('wsmymisName'))]",
+            "[concat('Microsoft.Web/Sites/', variables('wsmymisName'), '/extensions/MSDeploy')]",
+            "[concat('Microsoft.Web/Sites/', variables('wsmymisName'), '/appsettings/connectionstrings')]",
+            "[concat('Microsoft.Web/Sites/', variables('wsmymisName'), '/appsettings/config')]"
+          ],
+          "properties": {
+            "webSocketsEnabled": true,
+            "alwaysOn": true,
+            "virtualApplications": [
+              {
+                "virtualPath": "/",
+                "physicalPath": "site\\wwwroot"
+              },
+              {
+                "virtualPath": "/api",
+                "physicalPath": "site\\wwwroot\\api"
+              }
+            ]
+          }
+        }
+      ]
+    }
