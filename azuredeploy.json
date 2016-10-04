@@ -392,7 +392,9 @@
             "[concat('Microsoft.Web/serverfarms/', variables('appsrvplanmymisName'))]",
             "[concat('Microsoft.Web/certificates/', variables('certificateName'))]",
             "[concat('Microsoft.Sql/servers/', variables('sqlsrvmymisName'))]",
-            "[concat('Microsoft.Web/Sites/', variables('wsmymisName'))]"
+            "[concat('Microsoft.Web/Sites/', variables('wsmymisName'))]",
+            "[concat('Microsoft.Sql/servers/', variables('sqlsrvmymisName'), '/databases/', variables('sqldbmymisName'))]",
+            "[concat('Microsoft.Sql/servers/', variables('sqlsrvmymisName'), '/databases/', variables('sqldbmymisName'), '/extensions/Import')]"
           ],
           "properties": {
             "packageUri": "https://mymiswebdeploy.blob.core.windows.net/artifacts/MyMis.Package.zip",
