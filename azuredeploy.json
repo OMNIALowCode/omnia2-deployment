@@ -22,7 +22,7 @@
       }
     },
     "sendgridPassword": {
-      "type": "string",
+      "type": "securestring",
       "metadata": {
         "description": "SendGrid login password"
       }
