@@ -196,7 +196,7 @@
             "MyMis.API.Services.Endpoint": "[concat('https://',variables('wsmymisName'), '.azurewebsites.net', '/api/v1/')]",
             "MyMis.API.Account.Endpoint": "[concat('https://',variables('wsmymisName'), '.azurewebsites.net', '/api/')]",
             "MyMis.Web.Endpoint": "[concat('https://',variables('wsmymisName'), '.azurewebsites.net/')]",
-            "MyMis.ScriptingEngine.Endpoint": "[concat('https://',variables('wsmymisName'), '.azurewebsites.net', '/scripting/Script/Execute')]",
+            "MyMis.ScriptingEngine.Endpoint": "[concat('https://',variables('wsmymisName'), '.azurewebsites.net', '/scripting/v1/Script/Execute')]",
             "MyMis.ExtensibilityEngine.Endpoint": "[concat('https://',variables('wsmymisName'), '.azurewebsites.net', '/scripting/DUMMYURL')]",
             "MyMis.ConnectorHub.Client": "***REMOVED***",
             "MyMis.ConnectorHub.Secret": "***REMOVED***",
