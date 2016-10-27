@@ -198,10 +198,7 @@
             "MyMis.Web.Endpoint": "[concat('https://',variables('wsmymisName'), '.azurewebsites.net/')]",
             "MyMis.ScriptingEngine.Endpoint": "[concat('https://',variables('wsmymisName'), '.azurewebsites.net', '/scripting/v1/Script/Execute')]",
             "MyMis.ExtensibilityEngine.Endpoint": "[concat('https://',variables('wsmymisName'), '.azurewebsites.net', '/scripting/DUMMYURL')]",
-            "MyMis.ConnectorHub.Client": "***REMOVED***",
-            "MyMis.ConnectorHub.Secret": "***REMOVED***",
             "MyMis.ConnectorHub.Endpoint": "[concat('https://',variables('wsmymisName'), '.azurewebsites.net', '/api/')]",
-            "MyMis.Keys.Encrypt.PrivateKey": ***REMOVED***,
             "MyMis.Plugins.Directory": "Plugins\\Release\\",
             "Microsoft.WindowsAzure.Plugins.Diagnostics.ConnectionString": "[concat('DefaultEndpointsProtocol=https;AccountName=', variables('samymisName'), ';AccountKey=', listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('samymisName')), '2015-05-01-preview').key1)]",
             "MyMis.Certificate.Thumbprint": "7B055233E36CAF1AFD251D9A76DCB2C169A8073B",
@@ -271,6 +268,39 @@
               }
             ]
           }
+        },
+        {
+          "apiVersion": "2015-08-01",
+          "dependsOn": [
+            "[concat('Microsoft.Web/Sites/', variables('wsmymisName'))]",
+            "[concat('Microsoft.Web/Sites/', variables('wsmymisName'), '/extensions/MSDeploy')]",
+            "[concat('Microsoft.Web/Sites/', variables('wsmymisName'), '/config/connectionstrings')]",
+            "[concat('Microsoft.Web/Sites/', variables('wsmymisName'), '/config/appsettings')]",
+            "[concat('Microsoft.Web/Sites/', variables('wsmymisName'), '/config/web')]"
+          ],
+          "name": "logs",
+          "properties": {
+            "applicationLogs": {
+              "fileSystem": {
+                "level": "Information",
+                "retentionInMb": 100,
+                "enabled": true
+              }
+            },
+            "detailedErrorMessages": {
+              "enabled": true
+            },
+            "failedRequestsTracing": {
+              "enabled": true
+            },
+            "httpLogs": {
+              "fileSystem": {
+                "retentionInMb": 100,
+                "enabled": true
+              }
+            }
+          },
+          "type": "config"
         }
       ]
     },
