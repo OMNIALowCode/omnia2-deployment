@@ -5,32 +5,32 @@
     "sqlServerAdminPassword": {
       "type": "securestring",
       "metadata": {
-        "description": "Password for the SQL Server - account is MyMisMaster or the variable sqlsrvmymisAdminLogin"
+        "description": "Password for the SQL Server admin login. Ensure it is compliant with the Microsoft SQL Server Strong Password Guidelines."
       }
     },
     "sendgridEmail": {
       "type": "string",
-      "defaultValue": "Configure a SendGrid account",
+      "defaultValue": "Configure a SendGrid account first!",
       "metadata": {
-        "description": "Email to be displayed on platform-sent emails"
+        "description": "Email to be displayed on the From field of platform-sent emails."
       }
     },
     "sendgridUsername": {
       "type": "string",
       "metadata": {
-        "description": "SendGrid login"
+        "description": "SendGrid login."
       }
     },
     "sendgridPassword": {
       "type": "securestring",
       "metadata": {
-        "description": "SendGrid login password"
+        "description": "SendGrid login password."
       }
     },
     "administrationEmail": {
       "type": "string",
       "metadata": {
-        "description": "Platform master email"
+        "description": "Email address to be used as the platform's default administrator login."
       }
     }
   },
