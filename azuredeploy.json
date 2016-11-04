@@ -10,7 +10,6 @@
     },
     "sendgridEmail": {
       "type": "string",
-      "defaultValue": "Configure a SendGrid account first!",
       "metadata": {
         "description": "Email to be displayed on the From field of platform-sent emails."
       }
