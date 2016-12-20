@@ -73,7 +73,7 @@
       },
       "resources": [
         {
-          "name": "AllowAllWindowsAzureIps",
+          "name": "AllowMSIPs",
           "type": "firewallrules",
           "location": "[resourceGroup().location]",
           "apiVersion": "2014-04-01-preview",

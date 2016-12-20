@@ -1,0 +1,132 @@
+﻿{
+  "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+  },
+  "variables": {
+    "location": "[resourceGroup().location]",
+    "wsmymisName": "[concat('wsmymis', uniqueString(resourceGroup().id))]",
+    "appsrvplanmymisName": "[concat('appsrvplanmymis', uniqueString(resourceGroup().id))]",
+  },
+  "resources": [
+      "name": "[variables('sqlsrvmymisName')]",
+      "type": "Microsoft.Sql/servers",
+      "location": "[resourceGroup().location]",
+      "apiVersion": "2014-04-01-preview",
+      "dependsOn": [ ],
+      "tags": {
+        "displayName": "sqlsrvmymis"
+      },
+      "properties": {
+        "version": "12.0",
+        "administratorLogin": "[variables('sqlsrvmymisAdminLogin')]",
+        "administratorLoginPassword": "[parameters('sqlServerAdminPassword')]"
+      },
+      "resources": [
+        {
+          "name": "AllowAllWindowsAzureIps",
+          "type": "firewallrules",
+          "location": "[resourceGroup().location]",
+          "apiVersion": "2014-04-01-preview",
+          "dependsOn": [
+            "[concat('Microsoft.Sql/servers/', variables('sqlsrvmymisName'))]"
+          ],
+          "properties": {
+            "startIpAddress": "0.0.0.0",
+            "endIpAddress": "0.0.0.0"
+          }
+        },
+        {
+          "apiVersion": "2014-04-01-preview",
+          "dependsOn": [
+            "[variables('sqlsrvmymisName')]"
+          ],
+          "location": "[resourceGroup().location]",
+          "name": "[variables('sqldbmymisName')]",
+          "properties": {
+            "collation": "[variables('sqldbCollation')]",
+            "edition": "Standard",
+            "maxSizeBytes": "1073741824",
+            "requestedServiceObjectiveName": "S0"
+          },
+          "tags": {
+            "displayName": "sqldbmymis"
+          },
+          "type": "databases",
+          "resources": [
+            {
+              "name": "Import",
+              "type": "extensions",
+              "apiVersion": "2014-04-01-preview",
+              "dependsOn": [
+                "[variables('sqlsrvmymisName')]",
+                "[variables('sqldbmymisName')]"
+              ],
+              "properties": {
+                "storageUri": "https://mymiswebdeploy.blob.core.windows.net/artifacts/mymisDefault.bacpac",
+                "administratorLogin": "[variables('sqlsrvmymisAdminLogin')]",
+                "administratorLoginPassword": "[parameters('sqlServerAdminPassword')]",
+                "operationMode": "Import",
+                "storageKeyType": "SharedAccessKey",
+                "storageKey": "?"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "[variables('appsrvplanmymisName')]",
+      "type": "Microsoft.Web/serverfarms",
+      "location": "[resourceGroup().location]",
+      "apiVersion": "2014-06-01",
+      "dependsOn": [ ],
+      "tags": {
+        "displayName": "appsrvplanmymis"
+      },
+      "properties": {
+        "name": "[variables('appsrvplanmymisName')]",
+        "sku": "Basic",
+        "workerSize": 0,
+        "numberOfWorkers": 1
+      }
+    },
+    {
+      "name": "[variables('wsmymisName')]",
+      "type": "Microsoft.Web/sites",
+      "location": "[resourceGroup().location]",
+      "apiVersion": "2015-08-01",
+      "dependsOn": [
+        "[concat('Microsoft.Web/serverfarms/', variables('appsrvplanmymisName'))]"
+      ],
+      "tags": {
+        "[concat('hidden-related:', resourceGroup().id, '/providers/Microsoft.Web/serverfarms/', variables('appsrvplanmymisName'))]": "Resource",
+        "displayName": "wsmymis"
+      },
+      "properties": {
+        "name": "[variables('wsmymisName')]",
+        "serverFarmId": "[resourceId('Microsoft.Web/serverfarms/', variables('appsrvplanmymisName'))]"
+      },
+      "resources": [
+        {
+          "apiVersion": "2015-08-01",
+          "name": "MSDeploy",
+          "type": "extensions",
+          "location": "[resourceGroup().location]",
+          "dependsOn": [
+            "[concat('Microsoft.Web/serverfarms/', variables('appsrvplanmymisName'))]",
+            "[concat('Microsoft.Web/Sites/', variables('wsmymisName'))]"
+          ],
+          "properties": {
+            "packageUri": "https://mymiswebdeploy.blob.core.windows.net/artifacts/MyMis.Package.Update.zip",
+            "setParameters": {
+              "IIS Web Application Name": "[variables('wsmymisName')]"
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "outputs": {
+  }
+}
