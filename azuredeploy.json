@@ -213,7 +213,7 @@
             "MyMis.Plugins.Directory": "Plugins\\Release\\",
             "Microsoft.WindowsAzure.Plugins.Diagnostics.ConnectionString": "[concat('DefaultEndpointsProtocol=https;AccountName=', variables('samymisName'), ';AccountKey=', listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('samymisName')), '2015-05-01-preview').key1)]",
             "MyMis.Certificate.Thumbprint": "7B055233E36CAF1AFD251D9A76DCB2C169A8073B",
-            "WEBSITE_LOAD_CERTIFICATES": "7B055233E36CAF1AFD251D9A76DCB2C169A8073B",
+            "WEBSITE_LOAD_CERTIFICATES": "*",
             "MyMis.Notification.From": "[parameters('sendgridEmail')]",
             "MyMis.Notification.SendGrid.Credentials.Username": "[parameters('sendgridUsername')]",
             "MyMis.Notification.SendGrid.Credentials.Password": "[parameters('sendgridPassword')]",
@@ -221,7 +221,9 @@
             "MyMis.SQL.Tenant.DefaultDatabase": "[variables('sqldbmymisName')]",
             "MyMis.DeploymentEnvironment": "AppService",
             "MyMis.CustomerID": "[parameters('platformCustomerID')]",
-            "MyMis.LicenseKey": "[parameters('platformLicenseKey')]"
+            "MyMis.LicenseKey": "[parameters('platformLicenseKey')]",
+			"MyMis.Azure.SubscriptionID": "[subscription().subscriptionId]",
+			"MyMis.Azure.TenantID": "[subscription().tenantId]"
           }
         },
         {
