@@ -221,9 +221,7 @@
             "MyMis.SQL.Tenant.DefaultDatabase": "[variables('sqldbmymisName')]",
             "MyMis.DeploymentEnvironment": "AppService",
             "MyMis.CustomerID": "[parameters('platformCustomerID')]",
-            "MyMis.LicenseKey": "[parameters('platformLicenseKey')]",
-			"MyMis.Azure.SubscriptionID": "[subscription().subscriptionId]",
-			"MyMis.Azure.TenantID": "[subscription().tenantId]"
+            "MyMis.LicenseKey": "[parameters('platformLicenseKey')]"
           }
         },
         {
