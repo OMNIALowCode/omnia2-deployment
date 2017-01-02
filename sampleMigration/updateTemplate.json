@@ -1,0 +1,63 @@
+{
+    "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "siteName": {
+            "type": "String",
+            "metadata": {
+                "description": "Website Name (without .azurewebsites.net)"
+            }
+        },
+        "slotName": {
+            "type": "String",
+            "metadata": {
+                "description": "What slot to update"
+            }
+        }
+    },
+    "variables": {
+        "location": "[resourceGroup().location]"
+    },
+    "resources": [
+        {
+            "type": "Microsoft.Web/sites",
+            "name": "[parameters('siteName')]",
+            "apiVersion": "2015-08-01",
+            "location": "[resourceGroup().location]",
+            "tags": {},
+            "properties": {},
+            "resources": [
+                {
+                    "type": "slots",
+                    "name": "[parameters('slotName')]",
+                    "apiVersion": "2015-08-01",
+                    "location": "[resourceGroup().location]",
+                    "tags": {},
+                    "properties": {},
+                    "resources": [
+                        {
+                            "type": "extensions",
+                            "name": "MSDeploy",
+                            "apiVersion": "2015-08-01",
+                            "location": "[resourceGroup().location]",
+                            "properties": {
+                                "packageUri": "https://mymiswebdeploy.blob.core.windows.net/platformversions/%REPLACEWITHVERSIONNUMBER%/MyMis.Package.zip",
+                                "setParameters": {
+                                    "IIS Web Application Name": "[parameters('siteName')]"
+                                }
+                            },
+                            "dependsOn": [
+                                "[parameters('slotName')]"
+                            ]
+                        }
+                    ],
+                    "dependsOn": [
+                        "[concat('Microsoft.Web/Sites/', parameters('siteName'))]"
+                    ]
+                }
+            ],
+            "dependsOn": []
+        }
+    ],
+    "outputs": {}
+}
