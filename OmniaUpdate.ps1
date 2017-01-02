@@ -7,13 +7,14 @@ Param(
     [string] [Parameter(Mandatory=$true)] $SubscriptionName, #as in -subscriptionname param elsewhere
     [string] [Parameter(Mandatory=$true)] $ResourceGroupName, #as in -resourcegroupname param elsewhere
     [string] $Version,
+    [string] $Slot = "Production",
     [switch] $force = $false,
     [switch] $whatIf = $false
 )
 
 $ErrorActionPreference = "Stop"
 $OutputEncoding = New-Object -typename System.Text.UTF8Encoding
-$thisScriptVersion = 1.0
+$thisScriptVersion = 1.1
 
 function Get-ScriptDirectory
 {
@@ -36,7 +37,7 @@ function Get-ScriptDirectory
 function BinariesUpdate
 {
     #Performs the update of the binaries on the desired instance of the platform.
-    param([string] $ResourceGroupName, [string] $Version, [string] $packageFolder, [bool] $whatIf = $false)
+    param([string] $ResourceGroupName, [string] $Version, [string] $packageFolder, [bool] $whatIf = $false, [string] $Slot)
     
     $templateUri = "$packageFolder"+"updateTemplate.json"
 
@@ -44,6 +45,7 @@ function BinariesUpdate
 
     $siteName = (($WebsiteName -split "://")[1] -split ".azurewebsites.net")[0]
     $templateParams.Add("siteName",$siteName);
+    $templateParams.Add("slotName", $Slot);
     
     ## Test template validity
     $result = Test-AzureRmResourceGroupDeployment -ResourceGroupName $ResourceGroupName -TemplateUri $templateUri -TemplateParameterObject $templateParams
@@ -52,7 +54,7 @@ function BinariesUpdate
     }
     
     ## If ok, perform it
-    Write-Host "Template is valid. Beginning update to version $Version on RG $ResourceGroupName"
+    Write-Host "Template is valid. Beginning update to version $Version on RG $ResourceGroupName, Website $siteName [$Slot]"
     if (-not $whatIf){
         Write-Progress -id 1 -activity "Deploying template" -Status "In Progress"
 
@@ -113,7 +115,7 @@ function CreateTempFile
 function PerformMigrations
 {
     #Invokes any scripts that need to be invoked.
-    param([System.Object[]] $migrationsList, [string] $migrationArgs, [bool] $whatIf)
+    param([System.Object[]] $migrationsList, [string] $migrationArgs, [bool] $whatIf, [string] $Slot)
     $siteName = (($WebsiteName -split "://")[1] -split ".azurewebsites.net")[0]
 
     if ($migrationList.Count -gt 0){
@@ -151,8 +153,8 @@ function PerformMigrations
 function BuildMigrationArgs
 {
     #Creates an object that will be passed to all the scripts we execute, containing all the information we deem necessary.
-    param([string] $ResourceGroupName,[string] $subscriptionName,[string] $WebsiteName )
-    $migrationArgs = "-ResourceGroupName $ResourceGroupName -subscriptionName $subscriptionName -WebsiteName $WebsiteName"
+    param([string] $ResourceGroupName,[string] $subscriptionName,[string] $WebsiteName,[string] $Slot )
+    $migrationArgs = "-ResourceGroupName $ResourceGroupName -subscriptionName $subscriptionName -WebsiteName $WebsiteName -Slot $Slot"
 
     return $migrationArgs
 }
@@ -164,7 +166,7 @@ function CompareVersions
     param([version]$currentVersion, [version]$Version, [bool] $force)
 
     if ($currentVersion -eq $Version){
-        Write-Host ("Current version is the same as the version you want to update to: $currentVersion")
+        Write-Host ("Current version is the same as the version you want to update to: $currentVersion") -ForegroundColor Yellow
         if (-not $force){
             $confirmation = Read-Host ("Are you sure you want to update again to ($currentVersion)? Y to continue")
             if ($confirmation -ne 'y' -and $confirmation -ne 'yes') {
@@ -172,25 +174,26 @@ function CompareVersions
             }
         }
         else{
-            Write-Host ("-Force is set, proceeding with update")
+            Write-Host ("-Force is set, proceeding with update") -ForegroundColor Yellow -BackgroundColor DarkMagenta
         }
         return $false
     }
     elseif ($currentVersion -gt $Version){
-        Write-Host ("Current version has a HIGHER VERSION NUMBER than the version you want to update to: ($currentVersion) > ($Version")
+        Write-Host ("Current version has a HIGHER VERSION NUMBER than the version you want to update to: ($currentVersion) -> ($Version)") -ForegroundColor Yellow
         if (-not $force){
-            Read-Host ("Are you sure you want to update to ($currentVersion)? Y to continue")
+            $confirmation = Read-Host ("Are you sure you want to update to ($currentVersion)? Y to continue")
             if ($confirmation -ne 'y' -and $confirmation -ne 'yes') {
                 throw "Update process stopped due to user request."
             }
         }
         else{
-            Write-Host ("-Force is set, proceeding with update")
+            Write-Host ("-Force is set, proceeding with update") -ForegroundColor Yellow -BackgroundColor DarkMagenta
         }
         return $false
     } 
     return $true
 }
+Write-Host "Omnia Platform update process - version $thisScriptVersion"
 
 #Login-AzureRmAccount
 Set-AzureRmContext -SubscriptionName $SubscriptionName
@@ -204,7 +207,26 @@ Write-Host "Got update feed. Latest version:" $latestVersion.Number
 $currentVersion = GetCurrentVersion $WebsiteName
 Write-Host "Current version of $WebsiteName is $currentVersion"
 
-$migrationArgs = BuildMigrationArgs $ResourceGroupName $subscriptionName $WebsiteName
+if ($slot -ne "Production"){
+    $siteName = (($WebsiteName -split "://")[1] -split ".azurewebsites.net")[0]
+    $slotSiteName = $siteName + "-" + $Slot + ".azurewebsites.net"
+    $currentSlotVersion = GetCurrentVersion $slotSiteName
+    Write-Host "Current version of $WebsiteName in the slot $Slot is $currentSlotVersion"
+    if ($currentVersion -ne $currentSlotVersion){
+        Write-Host "The current version in slot $slot is not the same as the version in production! This may cause issues with configuration migrations." -ForegroundColor Yellow
+        if (-not $force.IsPresent){
+            $confirmation = Read-Host ("Are you sure you want to upgrade the slot $slot even though it may cause configuration issues?")
+            if ($confirmation -ne 'y' -and $confirmation -ne 'yes') {
+                throw "Swap not performed. Please re-create the site in slot $slot as a copy of the production site first."
+            }
+        }
+        else{
+            Write-Host ("-Force is set, proceeding with swap") -ForegroundColor Yellow -BackgroundColor DarkMagenta
+        }
+    }
+}
+
+$migrationArgs = BuildMigrationArgs $ResourceGroupName $subscriptionName $WebsiteName $Slot
 
 if ($Version -eq ""){
     Write-Host "Going to update to the latest version."
@@ -226,6 +248,28 @@ $canExecuteMigrations = CompareVersions ([version]$currentVersion) ([version]$ve
 Write-Host "Checking for migrations with scripts..."
 $migrationList = @(GetMigrationsList $currentVersion $updateFeed.PlatformVersions.Version $versionInfo.Number)
 if ($canExecuteMigrations){
-    PerformMigrations $migrationList $migrationArgs $whatIf.IsPresent
+    PerformMigrations $migrationList $migrationArgs $whatIf.IsPresent $Slot
 }
-BinariesUpdate $ResourceGroupName $versionInfo.Number $versionInfo.PackageFolder $whatIf.IsPresent
+BinariesUpdate $ResourceGroupName $versionInfo.Number $versionInfo.PackageFolder $whatIf.IsPresent $Slot
+
+if ($Slot -ne "Production"){
+    if (-not $force.IsPresent){
+        $confirmation = Read-Host ("Are you sure you want to perform a swap from slot $Slot to slot Production?")
+        if ($confirmation -ne 'y' -and $confirmation -ne 'yes') {
+            Write-Host "Swap not performed. Please perform it manually via the Azure Portal." -ForegroundColor Yellow -BackgroundColor DarkMagenta
+            return
+        }
+    }
+    else{
+        Write-Host ("-Force is set, proceeding with swap") -ForegroundColor Yellow -BackgroundColor DarkMagenta
+    }
+    $siteName = (($WebsiteName -split "://")[1] -split ".azurewebsites.net")[0]
+
+    Write-Host "Beginning the swap between slot $Slot and slot Production."
+    
+    Write-Progress -id 4 -activity "Performing Swap" -Status "Beginning Swap"
+
+    Swap-AzureRmWebAppSlot -ResourceGroupName $ResourceGroupName -Name $siteName -SourceSlotName $Slot -DestinationSlotName production
+    
+    Write-Progress -id 4 -activity "Performing Swap" -Status "Completed" -completed
+}
