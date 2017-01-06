@@ -9,12 +9,13 @@ Param(
     [string] $Version,
     [string] $Slot = "Production",
     [switch] $force = $false,
-    [switch] $whatIf = $false
+    [switch] $whatIf = $false,
+    [switch] $allowReupdate = $false
 )
 
 $ErrorActionPreference = "Stop"
 $OutputEncoding = New-Object -typename System.Text.UTF8Encoding
-$thisScriptVersion = 1.1
+$thisScriptVersion = 1.2
 
 function Get-ScriptDirectory
 {
@@ -163,10 +164,13 @@ function CompareVersions
 {
     #Compares the version you want to update to and the version of the platform, and notifies the user if they are re-updating or rolling back an update. 
     #If it returns false, we should not execute migration scripts.
-    param([version]$currentVersion, [version]$Version, [bool] $force)
+    param([version]$currentVersion, [version]$Version, [bool] $force, [bool] $allowReupdate)
 
     if ($currentVersion -eq $Version){
         Write-Host ("Current version is the same as the version you want to update to: $currentVersion") -ForegroundColor Yellow
+		if (-not $allowReupdate){
+			throw "Allow Reupdate is not set, or set to false. Stopping update process."
+		}
         if (-not $force){
             $confirmation = Read-Host ("Are you sure you want to update again to ($currentVersion)? Y to continue")
             if ($confirmation -ne 'y' -and $confirmation -ne 'yes') {
@@ -180,6 +184,9 @@ function CompareVersions
     }
     elseif ($currentVersion -gt $Version){
         Write-Host ("Current version has a HIGHER VERSION NUMBER than the version you want to update to: ($currentVersion) -> ($Version)") -ForegroundColor Yellow
+		if (-not $allowReupdate){
+			throw "Allow Reupdate is not set, or set to false. Stopping update process."
+		}
         if (-not $force){
             $confirmation = Read-Host ("Are you sure you want to update to ($currentVersion)? Y to continue")
             if ($confirmation -ne 'y' -and $confirmation -ne 'yes') {
@@ -243,7 +250,7 @@ else{
     }
 }
 
-$canExecuteMigrations = CompareVersions ([version]$currentVersion) ([version]$versionInfo.Number) $force
+$canExecuteMigrations = CompareVersions ([version]$currentVersion) ([version]$versionInfo.Number) $force $allowReupdate
 
 Write-Host "Checking for migrations with scripts..."
 $migrationList = @(GetMigrationsList $currentVersion $updateFeed.PlatformVersions.Version $versionInfo.Number)
@@ -268,8 +275,9 @@ if ($Slot -ne "Production"){
     Write-Host "Beginning the swap between slot $Slot and slot Production."
     
     Write-Progress -id 4 -activity "Performing Swap" -Status "Beginning Swap"
-
-    Swap-AzureRmWebAppSlot -ResourceGroupName $ResourceGroupName -Name $siteName -SourceSlotName $Slot -DestinationSlotName production
     
+	if (-not $whatIf.IsPresent){
+		Swap-AzureRmWebAppSlot -ResourceGroupName $ResourceGroupName -Name $siteName -SourceSlotName $Slot -DestinationSlotName production
+    }
     Write-Progress -id 4 -activity "Performing Swap" -Status "Completed" -completed
 }
