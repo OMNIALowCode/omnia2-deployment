@@ -6,16 +6,17 @@ Param(
     [string] [Parameter(Mandatory=$true)] $WebsiteName, #http or https://*.azurewebsites.net
     [string] [Parameter(Mandatory=$true)] $SubscriptionName, #as in -subscriptionname param elsewhere
     [string] [Parameter(Mandatory=$true)] $ResourceGroupName, #as in -resourcegroupname param elsewhere
+    [string] $ResourceNameString,
     [string] $Version,
     [string] $Slot = "Production",
     [switch] $force = $false,
     [switch] $whatIf = $false,
-    [switch] $allowReupdate = $false
+	[string] $FeedURL = "https://mymiswebdeploy.blob.core.windows.net/platformversions/updateFeed.xml"
 )
 
 $ErrorActionPreference = "Stop"
 $OutputEncoding = New-Object -typename System.Text.UTF8Encoding
-$thisScriptVersion = 1.2
+$thisScriptVersion = 1.3
 
 function Get-ScriptDirectory
 {
@@ -74,10 +75,20 @@ function GetCurrentVersion
     param([string] $WebsiteName)
     
     Write-Progress -id 2 -activity "Obtaining version" -Status "In Progress"
-    $apiData = Invoke-WebRequest "$WebsiteName/api"
-    $VersionStr = $apiData.ParsedHTML.body.getElementsByTagName("h1")[0].innerHTML
+    try{ #Version is at least 1.200.166
+        $VersionStr = Invoke-RestMethod "$WebsiteName/api/v1/Version/Get" -UseBasicParsing
+        if (-not $VersionStr -or $VersionStr.Length -eq 0){
+            throw "API error - version not found"
+        }
+    }
+    catch{
+        $apiData = Invoke-WebRequest "$WebsiteName/api" -UseBasicParsing
+        $startPos = ($apiData.Content.IndexOf("Platform - ")+("Platform - ").Length)
+        $versionLen = $apiData.Content.IndexOf("</h1>") - $startPos
+        $VersionStr = $apiData.Content.Substring($startPos,$versionLen)
+    }
     Write-Progress -id 2 -activity "Obtaining version" -Status "Obtained" -Completed
-    return $VersionStr.Split("-")[1].Split(" ")[1]
+    return $VersionStr
 }
 
 function GetMigrationsList
@@ -91,7 +102,7 @@ function GetMigrationsList
 
         [array]$majorChanges = $versionList | Select-Object @{name='Number';expression={(New-Object version $_."Number")}},PackageFolder,ExecuteScript,MajorChange | Where-Object Number -gt ([version] $currentVersion) |  Where-Object Number -lt ([version] $Version) | Where-Object MajorChange -Eq "true"
 
-        if ($majorChanges.Count -gt 0){
+        if ($majorChanges -and $majorChanges.Count -gt 0){
             throw "Major breaking changes detected that will not allow for a one-step platform migration. Please perform manual migrations for the versions: " + $majorChanges.Number
         }
         return $migrationList
@@ -116,16 +127,16 @@ function CreateTempFile
 function PerformMigrations
 {
     #Invokes any scripts that need to be invoked.
-    param([System.Object[]] $migrationsList, [string] $migrationArgs, [bool] $whatIf, [string] $Slot)
+    param([System.Object[]] $migrationList, [string] $migrationArgs, [bool] $whatIf, [string] $Slot)
     $siteName = (($WebsiteName -split "://")[1] -split ".azurewebsites.net")[0]
-
-    if ($migrationList.Count -gt 0){
+    
+    if ($migrationList -and $migrationList.Count -gt 0){
         Write-Host ("Detected "+$migrationList.Count+" migrations with scripts. Applying...")
         if (-not $whatIf){
             Write-Progress -id 3 -activity "Applying migrations" -Status "In Progress"
             ForEach ($obj In $migrationList){
                 $scriptUri = $obj.PackageFolder+"migrationScript.ps1"
-                $resp = (Invoke-WebRequest -Uri $scriptUri -Method GET -ContentType "application/octet-stream;charset=utf-8")
+                $resp = (Invoke-WebRequest -Uri $scriptUri -Method GET -ContentType "application/octet-stream;charset=utf-8" -UseBasicParsing)
                 $migrationScript = [system.Text.Encoding]::UTF8.GetString($resp.RawContentStream.ToArray());
                 $tempPath = Get-ScriptDirectory #TODO: Investigate way to run scripts in memory without saving them
                 $fileLocation = CreateTempFile $tempPath "migrationScript.ps1" $migrationScript
@@ -154,8 +165,8 @@ function PerformMigrations
 function BuildMigrationArgs
 {
     #Creates an object that will be passed to all the scripts we execute, containing all the information we deem necessary.
-    param([string] $ResourceGroupName,[string] $subscriptionName,[string] $WebsiteName,[string] $Slot )
-    $migrationArgs = "-ResourceGroupName $ResourceGroupName -subscriptionName $subscriptionName -WebsiteName $WebsiteName -Slot $Slot"
+    param([string] $ResourceGroupName,[string] $subscriptionName,[string] $WebsiteName,[string] $Slot, [string] $ResourceNameString )
+    $migrationArgs = "-ResourceGroupName `"$ResourceGroupName`" -subscriptionName `"$subscriptionName`" -WebsiteName `"$WebsiteName`" -Slot `"$Slot`" -ResourceNameString `"$ResourceNameString`""
 
     return $migrationArgs
 }
@@ -164,37 +175,35 @@ function CompareVersions
 {
     #Compares the version you want to update to and the version of the platform, and notifies the user if they are re-updating or rolling back an update. 
     #If it returns false, we should not execute migration scripts.
-    param([version]$currentVersion, [version]$Version, [bool] $force, [bool] $allowReupdate)
+    param([version]$currentVersion, [version]$Version, [bool] $force)
 
     if ($currentVersion -eq $Version){
         Write-Host ("Current version is the same as the version you want to update to: $currentVersion") -ForegroundColor Yellow
-		if (-not $allowReupdate){
-			throw "Allow Reupdate is not set, or set to false. Stopping update process."
-		}
         if (-not $force){
-            $confirmation = Read-Host ("Are you sure you want to update again to ($currentVersion)? Y to continue")
-            if ($confirmation -ne 'y' -and $confirmation -ne 'yes') {
-                throw "Update process stopped due to user request."
+            $confirmation = Read-Host ("Do you want to stop the update process? N to continue")
+            if ($confirmation -ne 'n' -and $confirmation -ne 'no') {
+                Write-Host "Update process stopped due to user request."
+                Exit 0
             }
         }
         else{
-            Write-Host ("-Force is set, proceeding with update") -ForegroundColor Yellow -BackgroundColor DarkMagenta
+            Write-Host ("-Force is set, stopping update") -ForegroundColor Yellow -BackgroundColor DarkMagenta
+            Exit 0
         }
         return $false
     }
     elseif ($currentVersion -gt $Version){
         Write-Host ("Current version has a HIGHER VERSION NUMBER than the version you want to update to: ($currentVersion) -> ($Version)") -ForegroundColor Yellow
-		if (-not $allowReupdate){
-			throw "Allow Reupdate is not set, or set to false. Stopping update process."
-		}
         if (-not $force){
-            $confirmation = Read-Host ("Are you sure you want to update to ($currentVersion)? Y to continue")
-            if ($confirmation -ne 'y' -and $confirmation -ne 'yes') {
-                throw "Update process stopped due to user request."
+            $confirmation = Read-Host ("Do you want to stop the update process? N to continue")
+            if ($confirmation -ne 'n' -and $confirmation -ne 'no') {
+                Write-host "Update process stopped due to user request."
+                Exit 0
             }
         }
         else{
-            Write-Host ("-Force is set, proceeding with update") -ForegroundColor Yellow -BackgroundColor DarkMagenta
+            Write-Host ("-Force is set, stopping update") -ForegroundColor Yellow -BackgroundColor DarkMagenta
+            Exit 0
         }
         return $false
     } 
@@ -205,17 +214,21 @@ Write-Host "Omnia Platform update process - version $thisScriptVersion"
 #Login-AzureRmAccount
 Set-AzureRmContext -SubscriptionName $SubscriptionName
 
-$updateFeed = [xml](Invoke-WebRequest "https://mymiswebdeploy.blob.core.windows.net/platformversions/updateFeed.xml").Content
+$siteName = (($WebsiteName -split "://")[1] -split ".azurewebsites.net")[0]
+if (-not $ResourceNameString){
+    $ResourceNameString = ($siteName -split "wsmymis")[1]
+}
+
+$updateFeed = [xml](Invoke-WebRequest $FeedURL -UseBasicParsing).Content
 
 ## Version checks
-$latestVersion = $updateFeed.PlatformVersions.Version[0]
+$latestVersion = ($updateFeed.PlatformVersions.Version | Sort-Object Number -Descending)[0]
 Write-Host "Got update feed. Latest version:" $latestVersion.Number
 
 $currentVersion = GetCurrentVersion $WebsiteName
 Write-Host "Current version of $WebsiteName is $currentVersion"
 
 if ($slot -ne "Production"){
-    $siteName = (($WebsiteName -split "://")[1] -split ".azurewebsites.net")[0]
     $slotSiteName = $siteName + "-" + $Slot + ".azurewebsites.net"
     $currentSlotVersion = GetCurrentVersion $slotSiteName
     Write-Host "Current version of $WebsiteName in the slot $Slot is $currentSlotVersion"
@@ -233,7 +246,7 @@ if ($slot -ne "Production"){
     }
 }
 
-$migrationArgs = BuildMigrationArgs $ResourceGroupName $subscriptionName $WebsiteName $Slot
+$migrationArgs = BuildMigrationArgs $ResourceGroupName $subscriptionName $WebsiteName $Slot $ResourceNameString
 
 if ($Version -eq ""){
     Write-Host "Going to update to the latest version."
@@ -250,7 +263,7 @@ else{
     }
 }
 
-$canExecuteMigrations = CompareVersions ([version]$currentVersion) ([version]$versionInfo.Number) $force $allowReupdate
+$canExecuteMigrations = CompareVersions ([version]$currentVersion) ([version]$versionInfo.Number) $force
 
 Write-Host "Checking for migrations with scripts..."
 $migrationList = @(GetMigrationsList $currentVersion $updateFeed.PlatformVersions.Version $versionInfo.Number)
