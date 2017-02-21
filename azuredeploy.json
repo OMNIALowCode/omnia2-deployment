@@ -96,7 +96,7 @@
             "collation": "[variables('sqldbCollation')]",
             "edition": "Standard",
             "maxSizeBytes": "1073741824",
-            "requestedServiceObjectiveName": "S0"
+            "requestedServiceObjectiveName": "S1"
           },
           "tags": {
             "displayName": "sqldbmymis"
