@@ -565,7 +565,7 @@ END CATCH
 ";
 
 
-$statements > LOG_UsersImport.sql
+$statements > ($folder+"\LOG_UsersImport.sql")
 
 $commandDomain = $connection.CreateCommand()
 $commandDomain.CommandText  = $statements

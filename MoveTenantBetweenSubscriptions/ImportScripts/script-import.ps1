@@ -95,7 +95,7 @@ $table.Load($versionResults)
 if ($table.Rows.Count -eq 1){
     $destinationDbVersion = ($table.Rows[0] | Select-Object DatabaseVersion)
     if ($destinationDbVersion.DatabaseVersion -ne $tenantInfo.DatabaseVersion){
-        Write-Host ("Tenant database version is not the same as the version in the export: $destinationDbVersion.DatabaseVersion -> $tenantInfo.DatabaseVersion") -ForegroundColor Yellow
+        Write-Host ("Tenant database version is not the same as the version in the export:"+ $destinationDbVersion.DatabaseVersion+ " -> " + $tenantInfo.DatabaseVersion) -ForegroundColor Yellow
         $confirmation = Read-Host ("Do you want to stop the process? N to continue")
         if ($confirmation -ne 'n' -and $confirmation -ne 'no') {
             throw "Migration process stopped due to user request."
