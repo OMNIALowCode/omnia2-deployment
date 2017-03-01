@@ -120,6 +120,8 @@ cd ..
 Write-Progress -id 1 -activity "Importing Data" -Status "Completed" -Completed
 
 WRITE-HOST "$(Get-Date -format 'u') - DB Indexs rebuilded..."
+
+Write-Host "Data imported sucessfully. Please recreate the connectors."
 }
 catch{
     Write-Host ("Process failed! " + $_.Exception)
