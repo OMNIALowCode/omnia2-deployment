@@ -1,4 +1,4 @@
-param([string]$code = "",[string]$apiID = "",[string]$apiEndpoint = "",[string]$master = "" ,[string]$masterpwd = "")
+param([string]$tenant = "",[string]$apiID = "",[string]$apiEndpoint = "",[string]$master = "" ,[string]$masterpwd = "")
 
 $thisfolder = $PSScriptRoot
 
@@ -19,7 +19,7 @@ param([string] $apiUser, [string]$apiID, [string] $apiPassword, [string] $apiEnd
 
 $accessToken = ObtainToken $master $apiID $masterpwd $apiEndpoint
 
-$uri = $apiEndpoint + "v1/tenant/remove?tenantcode=$code"
+$uri = $apiEndpoint + "v1/tenant/remove?tenantcode=$tenant"
 
 
 Write-host "Sending deletion request to $uri"
@@ -49,7 +49,7 @@ try{
         Start-Sleep -s 10
         $tracking = Invoke-WebRequest -Uri $Uri -Method GET -ContentType "application/json" -Headers @{"Authorization" = "$Authorization"} 
     }
-	Write-Host "Tenant $code deleted successfully"
+	Write-Host "Tenant $tenant deleted successfully"
 }
 catch{
     $tracking = $_.Exception;

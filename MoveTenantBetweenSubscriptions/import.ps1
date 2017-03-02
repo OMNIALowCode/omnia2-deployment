@@ -149,7 +149,7 @@ catch{
     if ($confirmation -eq 'y' -or $confirmation -eq 'yes') {
         cd $workingFolder
         cd .\ImportScripts
-        & .\script-tenant-delete.ps1 -code $tenant -apiID $apiID -apiEndpoint $apiEndpoint -master $master -masterpwd $masterpwd
+        & .\script-tenant-delete.ps1 -tenant $tenant -apiID $apiID -apiEndpoint $apiEndpoint -master $master -masterpwd $masterpwd
     }
     cd $workingFolder
 }
