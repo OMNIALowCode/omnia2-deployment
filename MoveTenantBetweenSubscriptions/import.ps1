@@ -5,7 +5,7 @@
     [string] $maxNumberOfUsers = "10",
     [string] $subGroupCode = "DefaultSubGroup",
     [string] [Parameter(Mandatory=$true)] $tenantAdmin,
-    [string] [Parameter(Mandatory=$true)] $tenantAdminPwd,
+    [string] $tenantAdminPwd,
     [string] [Parameter(Mandatory=$true)] $oem,
     [string] [Parameter(Mandatory=$true)] $master,
     [string] [Parameter(Mandatory=$true)] $masterpwd,
@@ -58,7 +58,7 @@ foreach ($setting in $webApp.SiteConfig.AppSettings){
     if ($setting.Name -eq "MyMis.OAuth2.ClientID"){
         $apiID = $setting.Value
     }
-    if ($setting.Name -eq "MyMis.ConnectorHub.Endpoint"){
+    if ($setting.Name -eq "MyMis.API.Account.Endpoint"){
         $apiEndpoint = $setting.Value
     }
 }
@@ -75,7 +75,7 @@ if (-not $server -or -not  $database -or -not $user -or -not $pwd){
 if (-not $apiID -or -not $apiEndpoint){
     throw "Invalid API configuration!"
 }
-if (-not $oem -or -not $shortcode -or -not $tenantname -or -not $tenantAdmin -or -not $tenantAdminPwd -or -not $oem -or -not $master -or -not $masterpwd){
+if (-not $oem -or -not $shortcode -or -not $tenantname -or -not $tenantAdmin -or -not $oem -or -not $master -or -not $masterpwd){
     throw "Invalid tenant creation configuration!"
 }
 
@@ -149,7 +149,7 @@ catch{
     if ($confirmation -eq 'y' -or $confirmation -eq 'yes') {
         cd $workingFolder
         cd .\ImportScripts
-        & .\script-tenant-delete.ps1 -code $tenant
-        cd ..
+        & .\script-tenant-delete.ps1 -code $tenant -apiID $apiID -apiEndpoint $apiEndpoint -master $master -masterpwd $masterpwd
     }
+    cd $workingFolder
 }

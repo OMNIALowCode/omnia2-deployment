@@ -20,6 +20,10 @@ param([string] $apiUser, [string]$apiID, [string] $apiPassword, [string] $apiEnd
 $accessToken = ObtainToken $master $apiID $masterpwd $apiEndpoint
 
 $uri = $apiEndpoint + "v1/tenant/remove?tenantcode=$code"
+
+
+Write-host "Sending deletion request to $uri"
+
 $Authorization = "Bearer $accessToken"
 try {
     $createResults = Invoke-WebRequest -Uri $uri -Method DELETE -Body $jsonRepresentation -ContentType "application/json" -Headers @{"Authorization" = "$Authorization"} 
@@ -32,7 +36,7 @@ $operationId = $createResults.Headers.'mymis-operation';
 $commandId = $createResults.Headers.'mymis-command';
 
 try{
-    $uri = "https://$apiEndpoint"+"v1/00000000-0000-0000-0000-000000000000/operation/TrackingCommand?operation=$operationId&command=$commandId"
+    $uri = "$apiEndpoint"+"v1/00000000-0000-0000-0000-000000000000/operation/TrackingCommand?operation=$operationId&command=$commandId"
     $tracking = Invoke-WebRequest -Uri $Uri -Method GET -ContentType "application/json" -Headers @{"Authorization" = "$Authorization"} 
     $status = (ConvertFrom-Json $tracking.Content).CommandStatus
     while (($status = (ConvertFrom-Json $tracking.Content).CommandStatus) -ne "Completed"){
@@ -50,5 +54,6 @@ try{
 catch{
     $tracking = $_.Exception;
     Write-Host $tracking;
+    throw $_.Exception;
 }
 cd $PSScriptRoot

@@ -13,7 +13,7 @@ $jsonRepresentation = @"
   "Email": "$tenantAdmin",
   "AdminEmail": "$tenantAdmin",
   "TenantTemplate": "",
-  "TenantType": "1",
+  "TenantType": "2",
   "Password": "$tenantAdminPwd",
   "TenantImage": null,
   "OEMBrand": "$oem",
@@ -37,13 +37,12 @@ param([string] $apiUser, [string]$apiID, [string] $apiPassword, [string] $apiEnd
     return $accessToken
 }
 
-
-#$jsonRepresentation |  Out-File "$thisfolder\tenant.json"
-#Write-Host "$thisfolder\tenant.json"
-
 $accessToken = ObtainToken $master $apiID $masterpwd $apiEndpoint
 
 $uri = $apiEndpoint + "v1/tenant/create"
+
+Write-host "Sending creation request for tenant $tenant to $uri"
+
 $Authorization = "Bearer $accessToken"
 try {
     $createResults = Invoke-WebRequest -Uri $uri -Method POST -Body $jsonRepresentation -ContentType "application/json" -Headers @{"Authorization" = "$Authorization"} 
@@ -56,7 +55,7 @@ $operationId = $createResults.Headers.'mymis-operation';
 $commandId = $createResults.Headers.'mymis-command';
 
 try{
-    $uri = "https://$apiEndpoint"+"v1/00000000-0000-0000-0000-000000000000/operation/TrackingCommand?operation=$operationId&command=$commandId"
+    $uri = "$apiEndpoint"+"v1/00000000-0000-0000-0000-000000000000/operation/TrackingCommand?operation=$operationId&command=$commandId"
     $tracking = Invoke-WebRequest -Uri $Uri -Method GET -ContentType "application/json" -Headers @{"Authorization" = "$Authorization"} 
     $status = (ConvertFrom-Json $tracking.Content).CommandStatus
     while (($status = (ConvertFrom-Json $tracking.Content).CommandStatus) -ne "Completed"){
@@ -74,5 +73,6 @@ try{
 catch{
     $tracking = $_.Exception;
     Write-Host $tracking;
+    throw $_.Exception;
 }
 cd $PSScriptRoot

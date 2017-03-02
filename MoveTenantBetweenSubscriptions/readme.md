@@ -38,19 +38,19 @@ Login-AzureRmAccount
 
 ### tenant [text]
 
-The tenant code (GUID).
+{The tenant code (GUID)}
 
 ### WebsiteName [text]
 
-The full URL of the Azure website (https:\\xxx.azurewebsites.net format
+{The full URL of the Azure website (https:\\xxx.azurewebsites.net format}
 
 ### SubscriptionName [text]
 
-The name of the Azure subscription (analogous to other -SubscriptionName in Azure Powershell
+{The name of the Azure subscription (analogous to other -SubscriptionName in Azure Powershell}
 
 ### ResourceGroupName [text]
 
-The name of the Azure resource group (analogous to other -ResourceGroupName in Azure Powershell)
+{The name of the Azure resource group (analogous to other -ResourceGroupName in Azure Powershell)}
 
 ## EXAMPLES
 ### Export example
@@ -75,19 +75,19 @@ Login-AzureRmAccount
 
 ### tenant [text]
 
-The tenant code (GUID).
+{The tenant code (GUID).}
 
 ### WebsiteName [text]
 
-The full URL of the Azure website (https:\\xxx.azurewebsites.net format
+{The full URL of the Azure website (https:\\xxx.azurewebsites.net format}
 
 ### SubscriptionName [text]
 
-The name of the Azure subscription (analogous to other -SubscriptionName in Azure Powershell
+{The name of the Azure subscription (analogous to other -SubscriptionName in Azure Powershell}
 
 ### ResourceGroupName [text]
 
-The name of the Azure resource group (analogous to other -ResourceGroupName in Azure Powershell)
+{The name of the Azure resource group (analogous to other -ResourceGroupName in Azure Powershell)}
 
 ### shortcode [text]
 
@@ -111,7 +111,7 @@ The name of the Azure resource group (analogous to other -ResourceGroupName in A
 
 ### tenantAdminPwd [text]
 
-{The password for the user that will be created has the tenant Admin}
+{The password for the user that will be created as the tenant Admin. If omitted, user will be associated to the tenant, if they exist; otherwise, the password will be randomly generated and sent to their email (should be valid)}
 
 ### oem [text]
 
