@@ -93,6 +93,7 @@ ALTER TABLE [$tenant].BinaryDataInboxes NOCHECK CONSTRAINT ALL
 ALTER TABLE [$tenant].PolicySets NOCHECK CONSTRAINT ALL
 ALTER TABLE [$tenant].Policies NOCHECK CONSTRAINT ALL
 ALTER TABLE [$tenant].Users NOCHECK CONSTRAINT ALL;
+ALTER TABLE [$tenant].UserFavorites NOCHECK CONSTRAINT ALL;
 
 DISABLE TRIGGER [$tenant].[trgMisEntities_Interaction_InsertUpdate] ON [$tenant].[MisEntities_Interaction];
 
@@ -510,15 +511,15 @@ set ModifiedByID = u.ID
 FROM [$tenant].Users u
 INNER JOIN [$tenant].Policies p on u.OldUserID = p.ModifiedByID
 
-
-
 UPDATE p
 set CreatedByID = u.ID
 FROM [$tenant].Users u
 INNER JOIN [$tenant].Policies p on u.OldUserID = p.CreatedByID
 
-
-
+UPDATE p
+set UserID = u.ID
+FROM [$tenant].Users u
+INNER JOIN [$tenant].UserFavorites p on u.OldUserID = p.UserID
 
 -- DISABLE CONSTRAINTS
 ALTER TABLE [$tenant].UserPrivileges CHECK CONSTRAINT ALL
@@ -538,6 +539,7 @@ ALTER TABLE [$tenant].BinaryDataInboxes CHECK CONSTRAINT ALL
 ALTER TABLE [$tenant].PolicySets CHECK CONSTRAINT ALL
 ALTER TABLE [$tenant].Policies CHECK CONSTRAINT ALL
 ALTER TABLE [$tenant].Users CHECK CONSTRAINT ALL;
+ALTER TABLE [$tenant].UserFavorites CHECK CONSTRAINT ALL;
 
 ENABLE TRIGGER [$tenant].[trgMisEntities_Interaction_InsertUpdate] ON [$tenant].[MisEntities_Interaction];
 
