@@ -1,6 +1,6 @@
 ﻿{
   "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
-  "contentVersion": "1.0.0.0",
+  "contentVersion": "1.0.1.0",
   "parameters": {
     "sqlServerAdminPassword": {
       "type": "securestring",
@@ -173,7 +173,7 @@
             "[concat('Microsoft.Sql/servers/', variables('sqlsrvmymisName'), '/databases/', variables('sqldbmymisName'), '/extensions/Import')]"
           ],
           "properties": {
-            "packageUri": "https://mymiswebdeploy.blob.core.windows.net/artifacts/MyMis.Package.zip",
+            "packageUri": "https://mymiswebdeploy.blob.core.windows.net/artifacts/Omnia.Package.zip",
             "setParameters": {
               "IIS Web Application Name": "[variables('wsmymisName')]"
             }
