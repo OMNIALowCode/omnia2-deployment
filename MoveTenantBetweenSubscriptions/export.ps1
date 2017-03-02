@@ -1,5 +1,5 @@
 ﻿param(
-    [string]$tenant = "", 
+    [string] [Parameter(Mandatory=$true)] $tenant = "", 
     [string] [Parameter(Mandatory=$true)] $WebsiteName, #http or https://*.azurewebsites.net
     [string] [Parameter(Mandatory=$true)] $SubscriptionName, #as in -subscriptionname param elsewhere
     [string] [Parameter(Mandatory=$true)] $ResourceGroupName #as in -resourcegroupname param elsewhere

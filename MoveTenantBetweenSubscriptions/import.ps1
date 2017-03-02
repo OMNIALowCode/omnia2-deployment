@@ -1,21 +1,41 @@
 ﻿param(
     [string] [Parameter(Mandatory=$true)] $tenant ,
-    [string]$shortcode,
-    [string]$tenantname,
-    [string]$maxNumberOfUsers = "10",
-    [string]$subGroupCode = "DefaultSubGroup",
-    [string]$tenantAdmin,
-    [string]$tenantAdminPwd,
-    [string]$oem,
-    [string]$master,
-    [string]$masterpwd,
+    [string] [Parameter(Mandatory=$true)]$shortcode,
+    [string] [Parameter(Mandatory=$true)] $tenantname,
+    [string] $maxNumberOfUsers = "10",
+    [string] $subGroupCode = "DefaultSubGroup",
+    [string] [Parameter(Mandatory=$true)] $tenantAdmin,
+    [string] [Parameter(Mandatory=$true)] $tenantAdminPwd,
+    [string] [Parameter(Mandatory=$true)] $oem,
+    [string] [Parameter(Mandatory=$true)] $master,
+    [string] [Parameter(Mandatory=$true)] $masterpwd,
     [string] [Parameter(Mandatory=$true)] $WebsiteName, #http or https://*.azurewebsites.net
     [string] [Parameter(Mandatory=$true)] $SubscriptionName, #as in -subscriptionname param elsewhere
     [string] [Parameter(Mandatory=$true)] $ResourceGroupName #as in -resourcegroupname param elsewhere
 )
+function Get-ScriptDirectory
+{
+    #Obtains the executing directory of the script
+    $Invocation = (Get-Variable MyInvocation -Scope 1).Value;
+    if($Invocation.PSScriptRoot)
+    {
+        $Invocation.PSScriptRoot;
+    }
+    Elseif($Invocation.MyCommand.Path)
+    {
+        Split-Path $Invocation.MyCommand.Path
+    }
+    else
+    {
+        $Invocation.InvocationName.Substring(0,$Invocation.InvocationName.LastIndexOf("\"));
+    }
+}
+
 $ErrorActionPreference = "Stop"
 
 Set-AzureRmContext -SubscriptionName $SubscriptionName
+
+$workingFolder = Get-ScriptDirectory
 
 $siteName = (($WebsiteName -split "://")[1] -split ".azurewebsites.net")[0]
 $webApp = Get-AzureRMWebAppSlot -ResourceGroupName $ResourceGroupName -Name $siteName -Slot "Production"
@@ -127,6 +147,9 @@ catch{
     Write-Host ("Process failed! " + $_.Exception)
     $confirmation = Read-Host ("Do you want to delete the created tenant? Y to confirm")
     if ($confirmation -eq 'y' -or $confirmation -eq 'yes') {
-        #TODO
+        cd $workingFolder
+        cd .\ImportScripts
+        & .\script-tenant-delete.ps1 -code $tenant
+        cd ..
     }
 }

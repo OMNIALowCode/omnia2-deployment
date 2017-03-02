@@ -1,26 +1,6 @@
-param([string]$code = "",[string]$shortcode = "",[string]$name = "",[string]$maxNumberOfUsers = "",[string]$subGroupCode = "",[string]$tenantAdmin = "",[string]$tenantAdminPwd = "",[string]$oem = "",[string]$apiID = "",[string]$apiEndpoint = "",[string]$master = "" ,[string]$masterpwd = "")
+param([string]$code = "",[string]$apiID = "",[string]$apiEndpoint = "",[string]$master = "" ,[string]$masterpwd = "")
 
 $thisfolder = $PSScriptRoot
-
-
-$jsonRepresentation = @"
-{
-  "Code": "$code",
-  "ShortCode": "$shortcode",
-  "Name": "$name",
-  "MaxNumberOfUsers": "$maxNumberOfUsers",
-  "SubGroupCode": "$subGroupCode",
-  "Email": "$tenantAdmin",
-  "AdminEmail": "$tenantAdmin",
-  "TenantTemplate": "",
-  "TenantType": "1",
-  "Password": "$tenantAdminPwd",
-  "TenantImage": null,
-  "OEMBrand": "$oem",
-  "Language": "en-US",
-  "Parameters": ""
-}
-"@
 
 function ObtainToken{
 param([string] $apiUser, [string]$apiID, [string] $apiPassword, [string] $apiEndpoint)
@@ -37,16 +17,12 @@ param([string] $apiUser, [string]$apiID, [string] $apiPassword, [string] $apiEnd
     return $accessToken
 }
 
-
-#$jsonRepresentation |  Out-File "$thisfolder\tenant.json"
-#Write-Host "$thisfolder\tenant.json"
-
 $accessToken = ObtainToken $master $apiID $masterpwd $apiEndpoint
 
-$uri = $apiEndpoint + "v1/tenant/create"
+$uri = $apiEndpoint + "v1/tenant/remove?tenantcode=$code"
 $Authorization = "Bearer $accessToken"
 try {
-    $createResults = Invoke-WebRequest -Uri $uri -Method POST -Body $jsonRepresentation -ContentType "application/json" -Headers @{"Authorization" = "$Authorization"} 
+    $createResults = Invoke-WebRequest -Uri $uri -Method DELETE -Body $jsonRepresentation -ContentType "application/json" -Headers @{"Authorization" = "$Authorization"} 
 }
 catch {
     $createResults = $_.Exception;
@@ -69,7 +45,7 @@ try{
         Start-Sleep -s 10
         $tracking = Invoke-WebRequest -Uri $Uri -Method GET -ContentType "application/json" -Headers @{"Authorization" = "$Authorization"} 
     }
-	Write-Host "Tenant created successfully with code $desiredTenantCode"
+	Write-Host "Tenant $code deleted successfully"
 }
 catch{
     $tracking = $_.Exception;
