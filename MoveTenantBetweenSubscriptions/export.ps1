@@ -83,3 +83,12 @@ Write-Progress -id 1 -activity "Exporting Data" -Status "Completed" -Completed
 WRITE-HOST "$(Get-Date -format 'u') - data exported..."
 
 Write-Host "Data exported sucessfully. Please execute import.ps1 to import the data to the destination subscription. Make sure you read the README before importing!"
+
+$datFolder = (Get-Item $PSScriptRoot).FullName + "\Exported\datfiles"
+$tenantInfo = Import-Csv $datFolder/'tenantInfo.csv'
+
+Write-Host ("`nInformation from the original tenant that may be used in the import step:
+Code = "+$tenantInfo.Code+"`nShortCode = "+$tenantInfo.ShortCode+
+"`nName = "+$tenantInfo.Name+"`nOEMBrand = "+$tenantInfo.OEMBrand+
+"`nSubGroup = "+$tenantInfo.SubGroup+"`nMaxNumberOfUsers = "+$tenantInfo.MaxNumberOfUsers)
+

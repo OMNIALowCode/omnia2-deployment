@@ -50,7 +50,13 @@ foreach ($Row in $table.Rows)
   Write-Progress -id 2 -activity "Copying Database Tables" -Status "Completed" -Completed
 
 $tenantInfoCommand = $connection.CreateCommand()
-$tenantInfoCommand.CommandText = "SELECT * FROM Auth.Tenants WHERE Code='$tenant'"
+$tenantInfoCommand.CommandText = "SELECT at.Code, at.ShortCode, at.Name, at.MaxNumberOfUsers,
+     at.DatabaseVersion, at.Version, at.CustomerName, at.CustomerContactName, at.VATNumber, at.CustomerAddress, at.CustomerCountry,
+     ob.Code 'OEMBrand', sg.Code 'SubGroup' 
+FROM Auth.Tenants at
+INNER JOIN Branding.OEMBrands ob ON at.OEMBrandID = ob.ID
+INNER JOIN Auth.SubGroups sg ON at.SubGroupID = sg.ID
+WHERE at.Code='$tenant'"
 
 $result = $tenantInfoCommand.ExecuteReader()
 
@@ -58,7 +64,7 @@ $table = new-object "System.Data.DataTable"
 
 $table.Load($result)
 if ($table.Rows.Count -eq 1){
-    $table.Rows[0] | Select-Object DatabaseVersion, Version, CustomerName, CustomerContactName, VATNumber, CustomerAddress, CustomerCountry | Export-Csv -Path $datFolder/'tenantInfo.csv'
+    $table.Rows[0] | Select-Object * | Export-Csv -Path $datFolder/'tenantInfo.csv' -Encoding UTF8
 }
 else{
     throw "Error: tenant not found in Auth.Tenants"
