@@ -16,7 +16,7 @@ Param(
 
 $ErrorActionPreference = "Stop"
 $OutputEncoding = New-Object -typename System.Text.UTF8Encoding
-$thisScriptVersion = 1.3
+$thisScriptVersion = 1.4
 
 function Get-ScriptDirectory
 {
@@ -293,4 +293,13 @@ if ($Slot -ne "Production"){
 		Swap-AzureRmWebAppSlot -ResourceGroupName $ResourceGroupName -Name $siteName -SourceSlotName $Slot -DestinationSlotName production
     }
     Write-Progress -id 4 -activity "Performing Swap" -Status "Completed" -completed
+}
+
+if (-not $whatIf.IsPresent){
+    $finalVersion = GetCurrentVersion $WebsiteName
+    Write-Host "Current version of $WebsiteName after update is $finalVersion"
+
+    if ($finalVersion -ne $versionInfo.Number){
+        throw ("Update inconsistent! Version in site after update finishing, $finalVersion, not the same as the desired version, "+$versionInfo.Number)
+    }
 }
