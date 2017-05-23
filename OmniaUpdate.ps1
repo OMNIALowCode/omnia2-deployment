@@ -16,7 +16,7 @@ Param(
 
 $ErrorActionPreference = "Stop"
 $OutputEncoding = New-Object -typename System.Text.UTF8Encoding
-$thisScriptVersion = 1.4
+$thisScriptVersion = 1.5
 
 function Get-ScriptDirectory
 {
@@ -222,7 +222,7 @@ if (-not $ResourceNameString){
 $updateFeed = [xml](Invoke-WebRequest $FeedURL -UseBasicParsing).Content
 
 ## Version checks
-$latestVersion = ($updateFeed.PlatformVersions.Version | Sort-Object Number -Descending)[0]
+$latestVersion = ($updateFeed.PlatformVersions.Version | Sort-Object @{e={$_.Number -as [version]}} -Descending)[0]
 Write-Host "Got update feed. Latest version:" $latestVersion.Number
 
 $currentVersion = GetCurrentVersion $WebsiteName
