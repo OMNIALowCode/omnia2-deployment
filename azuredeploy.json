@@ -173,10 +173,7 @@
             "[concat('Microsoft.Sql/servers/', variables('sqlsrvmymisName'), '/databases/', variables('sqldbmymisName'), '/extensions/Import')]"
           ],
           "properties": {
-            "packageUri": "https://mymiswebdeploy.blob.core.windows.net/artifacts/Omnia.Package.zip",
-            "setParameters": {
-              "IIS Web Application Name": "[variables('wsmymisName')]"
-            }
+            "packageUri": "https://mymiswebdeploy.blob.core.windows.net/artifacts/Omnia.Package.zip"
           }
         },
         {
