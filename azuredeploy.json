@@ -1,6 +1,6 @@
 ﻿{
   "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
-  "contentVersion": "1.0.1.0",
+  "contentVersion": "1.0.2.0",
   "parameters": {
     "sqlServerAdminPassword": {
       "type": "securestring",
@@ -95,7 +95,7 @@
           "properties": {
             "collation": "[variables('sqldbCollation')]",
             "edition": "Standard",
-            "maxSizeBytes": "1073741824",
+            "maxSizeBytes": "21474836480",
             "requestedServiceObjectiveName": "S1"
           },
           "tags": {
