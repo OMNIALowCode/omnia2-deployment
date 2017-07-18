@@ -16,7 +16,7 @@ Param(
 
 $ErrorActionPreference = "Stop"
 $OutputEncoding = New-Object -typename System.Text.UTF8Encoding
-$thisScriptVersion = 1.5
+$thisScriptVersion = 1.6
 
 function Get-ScriptDirectory
 {
@@ -77,15 +77,24 @@ function GetCurrentVersion
     Write-Progress -id 2 -activity "Obtaining version" -Status "In Progress"
     try{ #Version is at least 1.200.166
         $VersionStr = Invoke-RestMethod "$WebsiteName/api/v1/Version/Get" -UseBasicParsing
-        if (-not $VersionStr -or $VersionStr.Length -eq 0){
+        if (-not $VersionStr -or $VersionStr.Length -eq 0 -or $VersionStr -like "*not found*" -or $VersionStr -like "*Oops*"){
             throw "API error - version not found"
         }
     }
     catch{
-        $apiData = Invoke-WebRequest "$WebsiteName/api" -UseBasicParsing
-        $startPos = ($apiData.Content.IndexOf("Platform - ")+("Platform - ").Length)
-        $versionLen = $apiData.Content.IndexOf("</h1>") - $startPos
-        $VersionStr = $apiData.Content.Substring($startPos,$versionLen)
+        try{
+            $apiData = Invoke-WebRequest "$WebsiteName/api" -UseBasicParsing
+            $startPos = ($apiData.Content.IndexOf("Platform - ")+("Platform - ").Length)
+            $versionLen = $apiData.Content.IndexOf("</h1>") - $startPos
+            $VersionStr = $apiData.Content.Substring($startPos,$versionLen)
+            if (-not $VersionStr -or $VersionStr.Length -eq 0 -or $VersionStr -like "*not found*" -or $VersionStr -like "*Oops*"){
+                throw "API error - version not found"
+            }
+        }
+        catch{
+            Write-Host "Failed obtaining version! Site may be failing. Assuming empty version."
+            $versionStr = "0.0.0"
+        }
     }
     Write-Progress -id 2 -activity "Obtaining version" -Status "Obtained" -Completed
     return $VersionStr
