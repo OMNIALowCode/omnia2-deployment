@@ -1,2 +1,2 @@
 # OMNIA Deployment
-You can deploy the OMNIA platform onto an Azure subscription on [our website](http://www.numbersbelieve.com/deploy).
+The deployment of new infrastructures of Omnia Platform in version 2 is no longer supported. 
